@@ -6,7 +6,7 @@ apt install dictzip (linux)
 apt install dictd (on android/termux)
 
 
-1) download the 'volubilis mundo.xlsx' (all languages, max wordcount) to the project folder from <a href='https://belisan-volubilis.blogspot.com/'>belisan-volubilis.blogspot.com</a>
+1) download the 'volubilis mundo.xlsx' (all languages, max wordcount) to the project folder from https://belisan-volubilis.blogspot.com
 2) open main__excel_extract_columns_to_txt-v10.py. almost at the end, set first argunent of the function call 'import_excel_file' to the filename of the downloaded file.
 3) run $ python main__excel_extract_columns_to_txt-v10.py
 
