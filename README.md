@@ -38,3 +38,10 @@ for developers:<br><br>
 If you want to create your own version of the dictionary files, i uploaded the converter scipt. it is written python and converts the spreadsheat into a tab separated txt file (one entry, one line). it also adds a reverse translation from English to Thai and a pronounciation search. eg .maa (the sound of the thai word) would find มา, ม้า and หมา<br><br><br>
 
 the script was written without any thought of publishing it (bad coding, and lots of manual intervention, so just: for research purposes), but because i use the final product myself a lot, i thought i make it available.
+
+-----
+
+copyright of the volubilis project:
+All information contained in the files can be used freely. I just invite you to mention the source.
+
+the copyright of this github project is therefore the same (all files may be used without restrain)
