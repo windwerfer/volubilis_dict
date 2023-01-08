@@ -1,8 +1,11 @@
 # volubilis_dict
 
 
-unofficial dictionary (stardict/mdict) files for the volubilis project (https://belisan-volubilis.blogspot.com).<br><br><br>
-
+unofficial dictionary (stardict/mdict) files for the volubilis project (https://belisan-volubilis.blogspot.com).<br>
+- 103'406 entries thai-english<br>
+- 101'915 entries english-thai<br>
+- thai pronounciation for most words, eg. ม้า [máa] n. classifier: ตัว
+- many expressions, like: ทิ้งไว้ [thíng wái] v. exp. leave behind ; leave undone<br><br><br>
 
 <img  style='width:90%;max-width:1445px;'  src='https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_thai_lookup.png'><br>
 the dictioanry is bilangual: Thai-English <br><br>
