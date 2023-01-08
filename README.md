@@ -4,11 +4,14 @@
 unofficial dictionary (stardict/mdict) files for the volubilis project (https://belisan-volubilis.blogspot.com).<br><br><br>
 
 
-<img src=''><br>
-the dictioanry is bilangual (th-en, en-th) and has a Level to each word, judging how basic it is (B = basic, A1 = intermediate, A2 = advanced, s = special).<br><br><br>
+<img  style='width:80%;max-width:1445px;'  src='https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_thai_lookup.png'><br>
+the dictioanry is bilangual: Thai-English <br><br>
+
+<img style='width:80%;max-width:1445px;' src='https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_english_lookup.png'>
+and English-Thai has a Level to each word, judging how basic it is (B = basic, A1 = intermediate, A2 = advanced, s = special).<br><br><br>
 
 
-<img src=''><br>
+<img  style='width:80%;max-width:1445px;'  src='https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_pronouciation_search-dictbox_android.png'><br>
 there is a pronounciation search. eg .maa (the sound of the thai word) would find มา, ม้า and หมา. almost every word has a pronuciation entry.<br><br><br>
 
 
@@ -22,7 +25,7 @@ Readable through <a href='http://www.huzheng.org/stardict/'>Stardict</a> (win/li
 
 
 <b>Install / use:</b>
-to be able to use the dictionary files, you need to download one of the dictionary apps from above and <a href=''>than download the compiled files</a> (.mdx for Mdict, stardict for all others) and after extracting, copy them into the dictionary folder.<br><br><br><br><br><br><br><br><br>
+to be able to use the dictionary files, you need to download one of the dictionary apps from above and than download the compiled <a href='https://github.com/windwerfer/volubilis_dict/blob/main/volubilis_stardict_2012-11-01.zip'>stardict</a> or <a href='https://github.com/windwerfer/volubilis_dict/blob/main/volubilis_mdict-mdx_2012-11-01.zip'>mdict</a> files</a> (.mdx for Mdict, stardict for all others) and after extracting, copy them into the dictionary folder.<br><br><br><br><br><br><br><br><br>
 
 
 
