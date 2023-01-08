@@ -43,5 +43,6 @@ the script was written without any thought of publishing it (bad coding, and lot
 
 copyright of the volubilis project:
 All information contained in the files can be used freely. I just invite you to mention the source.
+--Francis Bastien
 
 the copyright of this github project is therefore the same (all files may be used without restrain)
