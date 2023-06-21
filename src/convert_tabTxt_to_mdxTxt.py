@@ -55,7 +55,8 @@ def process_to_txtMdx(li):
     r = []
     for l in li:
         tmp = l.split('\t')
-        if len(tmp) != 2:
+        #ignore invalid entries
+        if len(tmp) != 2 or len(tmp[0]) == 0 or len(tmp[1]) == 0:
             continue
         # tmp[1] already has a \n at the end
 
@@ -67,7 +68,7 @@ def process_to_txtMdx(li):
             for s in range(1,len(syn)):
                 x = syn[s] + '\n@@@LINK=' + syn[0] + '\n</>\n'
                 r.append(x)
-
+        #remove newline at the end of the string
         tmp[1] = regex.sub(r'\\n', '', tmp[1])
 
         x = tmp[0] + '\n' + tmp[1] + '</>\n'

@@ -290,9 +290,12 @@ def import_excel_file(xlsx_file, to_folder, columns=30, paiboon=True, debug=Fals
                 continue
             # print(row[0])
             # breakpoint()
-            # if there is no english definition, ignore row   --- row 5 is english -> row[4]
+            # if there is no english definition: ignore row
+            #  -> row 5 is english => row[4]
+            # if there is no thai: ignore row 
+            #  -> row 4 is thai => row[3]
             # lao is 25(lao) and 26(lao-roman)
-            if 4 >= len(row) or str(row[4]) == "None" or str(row[4]) == "None":
+            if 4 >= len(row) or str(row[4]) == "None" or str(row[3]) == "None":
                 continue
             s = ""
             # for file in r:
@@ -551,7 +554,7 @@ debug_test_1000_rows = False
 
 if __name__ == "__main__":
     import_excel_file(
-        "vol_mundo_01.03.2023.xlsx",
+        "vol_mundo_01.06.2023.xlsx",
         to_folder="vol_mundo",
         columns=30,
         paiboon=True,
