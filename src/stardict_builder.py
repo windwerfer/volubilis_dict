@@ -22,7 +22,7 @@ class StardictBuilder:
         """Convert all txt files to Stardict format."""
         self.unzipped_dir.mkdir(parents=True, exist_ok=True)
 
-        txt_files = list(self.txt_dir.glob("d_*.txt"))
+        txt_files = list(self.txt_dir.glob("volubilis_*.txt"))
         if not txt_files:
             raise FileNotFoundError(f"No txt files found in {self.txt_dir}")
 
@@ -31,21 +31,9 @@ class StardictBuilder:
 
     def _convert_single_file(self, txt_file: Path) -> None:
         """Convert a single txt file to Stardict format."""
-        # Determine output name based on input filename
-        logger.debug(f"Processing file: {txt_file.name}")
-        if "th-en" in txt_file.name:
-            if "dot+pr" in txt_file.name:
-                output_name = "volubilis_th-dot-pr-en"
-                logger.debug("Matched dot+pr pattern")
-            elif "(pr)" in txt_file.name:
-                output_name = "volubilis_th-pr-en"
-                logger.debug("Matched (pr) pattern")
-            else:
-                output_name = "volubilis_th-en"
-                logger.debug("Matched th-en default")
-        else:
-            output_name = "volubilis_en-th"
-            logger.debug("Matched en-th pattern")
+        # Use the txt file stem as the output name
+        output_name = txt_file.stem
+        logger.debug(f"Processing file: {txt_file.name}, output: {output_name}")
 
         output_file = self.unzipped_dir / f"{output_name}.ifo"
 

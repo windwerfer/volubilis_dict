@@ -185,10 +185,10 @@ class DictionaryProcessor:
         base_path = self.config.output_folder
 
         return {
-            'th_en': open(base_path / "d_th-en.txt", "w", encoding='utf-8'),
-            'th_pron_en': open(base_path / "d_th(pr)-en.txt", "w", encoding='utf-8'),
-            'th_dot_pron_en': open(base_path / "d_th(dot+pr)-en.txt", "w", encoding='utf-8'),
-            'en_th': open(base_path / "d_en-th.txt", "w", encoding='utf-8'),
+            'th_en': open(base_path / "volubilis_th-en.txt", "w", encoding='utf-8'),
+            'th_pron_en': open(base_path / "volubilis_th-pr-en.txt", "w", encoding='utf-8'),
+            'th_dot_pron_en': open(base_path / "volubilis_th-dot-pr-en.txt", "w", encoding='utf-8'),
+            'en_th': open(base_path / "volubilis_en-th.txt", "w", encoding='utf-8'),
         }
 
     def _process_row(
