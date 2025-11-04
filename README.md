@@ -10,6 +10,73 @@ most recent version: 01.06.2023.<br>
 - thai pronounciation for most words, eg. ม้า [máa] n. classifier: ตัว
 - many expressions, like: ทิ้งไว้ [thíng wái] v. exp. leave behind ; leave undone<br><br><br>
 
+## Installation
+
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+
+### Command Line Interface
+
+Process the Excel file with default settings:
+```bash
+python -m src.main
+```
+
+Process with custom options:
+```bash
+python -m src.main --excel-file custom.xlsx --output-dir output/ --verbose
+```
+
+Available options:
+- `--excel-file, -f`: Path to Excel file (default: vol_mundo_01.06.2023.xlsx)
+- `--output-dir, -o`: Output directory (default: vol_mundo)
+- `--columns`: Number of columns to process (default: 30)
+- `--no-paiboon`: Disable Paiboon transcription
+- `--debug-1000`: Process only first 1000 rows for testing
+- `--verbose, -v`: Enable verbose logging
+
+### Python API
+
+```python
+from src.config import Config
+from src.dictionary_processor import DictionaryProcessor
+
+config = Config()
+processor = DictionaryProcessor(config)
+processor.process_excel_file()
+```
+
+## Development
+
+### Running Tests
+
+```bash
+pytest
+```
+
+### Project Structure
+
+```
+src/
+├── __init__.py          # Package initialization
+├── config.py            # Configuration management
+├── exceptions.py        # Custom exceptions
+├── file_handler.py      # File I/O utilities
+├── text_formatter.py    # Text processing and regex transformations
+├── dictionary_processor.py  # Main Excel processing logic
+└── main.py              # CLI interface
+
+tests/
+└── test_text_formatter.py  # Unit tests
+
+requirements.txt         # Python dependencies
+setup.py                # Package setup
+pytest.ini             # Test configuration
+```
+
 <img  style='width:90%;max-width:1445px;'  src='https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_thai_lookup.png'><br>
 the dictioanry is bilangual: Thai-English <br><br>
 
@@ -28,9 +95,32 @@ to be able to use the dictionary files, you need to download one of the dictiona
 
 ---
 
-for developers:<br><br>
+## For Developers
 
-If you want to create your own version of the dictionary files, i uploaded the converter scipt. it is written python and converts the spreadsheat into a tab separated txt file (one entry, one line). it also adds a reverse translation from English to Thai and a pronounciation search. eg .maa (the sound of the thai word) would find มา, ม้า and หมา<br><br><br>
+The codebase has been completely rewritten with modern Python practices:
+
+- **Modular Architecture**: Separated concerns into focused classes
+- **Type Hints**: Full type annotation coverage
+- **Configuration Management**: Centralized settings with validation
+- **Error Handling**: Custom exceptions and proper logging
+- **Testing**: Unit tests with pytest
+- **CLI Interface**: Command-line interface with argparse
+
+### Key Improvements
+
+1. **TextFormatter**: Handles all regex transformations and text processing
+2. **DictionaryProcessor**: Main Excel parsing and data processing logic
+3. **FileHandler**: Safe file I/O with context managers
+4. **Config**: Centralized configuration with validation
+5. **Custom Exceptions**: Proper error handling hierarchy
+
+### Legacy Code
+
+The original scripts are preserved in `src/` for reference:
+- `convert_tabTxt_to_mdxTxt.py`: MDX conversion utility
+- `main__excel_extract_columns_to_txt-v10.py`: Original Excel processing script
+
+The new codebase provides the same functionality with better maintainability and extensibility.
 
 the script was written without any thought of publishing it (bad coding, and lots of manual intervention, so just: for research purposes), but because i use the final product myself a lot, i thought i make it available.
 

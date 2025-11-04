@@ -1,3 +1,4 @@
 readme_how_to_upload_to_git.txt
 .git
 vol_mundo/
+src/__pycache__
