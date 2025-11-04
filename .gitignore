@@ -3,3 +3,5 @@ readme_how_to_upload_to_git.txt
 vol_mundo/
 src/__pycache__
 venv
+__pycache__
+stardict

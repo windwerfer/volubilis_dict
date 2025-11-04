@@ -14,9 +14,9 @@ except ImportError:
     OPENPYXL_AVAILABLE = False
     load_workbook = None
 
-from config import Config, DictionaryConfig
-from file_handler import FileHandler
-from text_formatter import TextFormatter
+from .config import Config, DictionaryConfig
+from .file_handler import FileHandler
+from .text_formatter import TextFormatter
 
 
 logger = logging.getLogger(__name__)
@@ -339,39 +339,39 @@ class DictionaryProcessor:
         english: str,
         dom: str = ""
     ) -> str:
-        """Format a complete definition string."""
-        definition = f'<thai><b>{thai}</b></thai> '
+        """Format a complete definition string with standard HTML and CSS classes."""
+        definition = f'<span class="thai"><strong>{thai}</strong></span> '
 
         # Add pronunciation
         if pron_formatted:
             if self.config.paiboon:
-                definition += f'<pron style="color:brown"> [{self.formatter.format_final_pronunciation(pron_formatted, self.config.paiboon)}] </pron>'
+                definition += f'<span class="pron">[{self.formatter.format_final_pronunciation(pron_formatted, self.config.paiboon)}]</span> '
             else:
-                definition += f'[{self.formatter.format_final_pronunciation(pron_formatted, self.config.paiboon)}]'
+                definition += f'<span class="pron">[{self.formatter.format_final_pronunciation(pron_formatted, self.config.paiboon)}]</span> '
 
         # Add type and usage
-        definition += f' <type style="color:green">{type_word.lower()} {usage}</type> '
+        definition += f'<span class="type">{type_word.lower()} {usage}</span> '
 
         # Add classifier
         if classif:
             classifiers = self.formatter.split_and_format_classifiers(classif, self.config.paiboon)
-            definition += f'<clf style="font-size:0.8em">classifier: {classifiers}</clf>'
+            definition += f'<span class="clf">classifier: {classifiers}</span> '
 
         # Add definition
-        definition += f"<br><def>{english}</def><br>"
+        definition += f'<br><span class="def">{english}</span><br>'
 
         # Add synonyms
         if syn:
             synonyms = self.formatter.split_and_format_synonyms(syn, self.config.paiboon)
-            definition += f'<syn>syn: {synonyms}</syn><br>'
+            definition += f'<span class="syn">syn: {synonyms}</span><br>'
 
         # Add scientific name
         if scient:
-            definition += f'<science style="font-size:0.8em">scient: {scient}</science><br>'
+            definition += f'<span class="science">scient: {scient}</span><br>'
 
         # Add note
         if note:
-            definition += f'<note style="font-size:0.8em">note: {note}</note><br>'
+            definition += f'<span class="note">note: {note}</span><br>'
 
         # Add level
         level_info = self._format_level_info(level, dom)
@@ -389,7 +389,7 @@ class DictionaryProcessor:
         return "  "
 
     def _format_level_info(self, level: str, dom: str) -> str:
-        """Format level and domain information."""
+        """Format level and domain information with standard HTML."""
         parts = []
         if level:
             parts.append(f"Level: {level}")
@@ -399,7 +399,7 @@ class DictionaryProcessor:
             parts.append(f"Category: {dom.lower()}")
 
         if parts:
-            return f'<level style="font-size:0.7em">{"".join(parts)}</level>'
+            return f'<span class="level">{"".join(parts)}</span>'
         return ""
 
     def _add_english_to_thai_entries(
@@ -450,7 +450,7 @@ class DictionaryProcessor:
             for word_type, definitions in sorted_types:
                 definitions.sort()
                 def_text = "<br>".join(definitions[2:] for definitions in definitions)
-                type_entries.append(f'<type style="color:green">{word_type}</type><br>{def_text}')
+                type_entries.append(f'<span class="type">{word_type}</span><br>{def_text}')
 
             word_entry += "<br>".join(type_entries)
             files['en_th'].write(f"{english_word}\t{word_entry}\n")

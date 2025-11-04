@@ -3,7 +3,7 @@
 import re
 from typing import Dict, List
 
-from config import RegexPatterns
+from .config import RegexPatterns
 
 
 class TextFormatter:
