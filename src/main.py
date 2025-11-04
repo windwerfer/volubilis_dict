@@ -29,13 +29,15 @@ Examples:
   python -m src.main --excel-file custom.xlsx --output-dir output/
   python -m src.main --verbose          # Enable debug logging
   python -m src.main --debug-1000       # Process only first 1000 rows for testing
+  python -m src.main --no-cache         # Disable caching
+  python -m src.main --refresh-cache    # Force cache refresh
         """
     )
 
     parser.add_argument(
         '--excel-file', '-f',
         type=Path,
-        default=Path("vol_mundo_01.06.2023.xlsx"),
+        default=Path("src/vol_mundo_01.06.2023.xlsx"),
         help='Path to the Excel file to process'
     )
 
@@ -49,7 +51,7 @@ Examples:
     parser.add_argument(
         '--columns',
         type=int,
-        default=30,
+        default=32,
         help='Number of columns to process'
     )
 
@@ -77,6 +79,18 @@ Examples:
         help='Path to configuration file (future feature)'
     )
 
+    parser.add_argument(
+        '--no-cache',
+        action='store_true',
+        help='Disable caching of processed data'
+    )
+
+    parser.add_argument(
+        '--refresh-cache',
+        action='store_true',
+        help='Force refresh of cache even if valid'
+    )
+
     return parser
 
 
@@ -98,6 +112,8 @@ def main() -> int:
         config.dictionary.columns = args.columns
         config.dictionary.paiboon = not args.no_paiboon
         config.dictionary.debug_test_1000_rows = args.debug_1000
+        config.dictionary.use_cache = not args.no_cache
+        config.dictionary.force_refresh_cache = args.refresh_cache
 
         # Validate configuration
         config.validate()

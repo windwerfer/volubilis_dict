@@ -34,10 +34,10 @@ class RegexPatterns:
     })
 
     to_paiboon: Dict[str, str] = field(default_factory=lambda: {
-        r"¯([bcdfghjklmnpqrstvwxyz]*)([aeiouɔ])([a-z]*)": r"-\1\2\u0301\3",
-        r"\\([bcdfghjklmnpqrstvwxyz]*)([aeiouɔ])([a-z]*)": r"-\1\2\u0302\3",
-        r"/([bcdfghjklmnpqrstvwxyz]*)([aeiouɔ])([a-z]*)": r"-\1\2\u030c\3",
-        r"_([bcdfghjklmnpqrstvwxyz]*)([aeiouɔ])([a-z]*)": r"-\1\2\u0300\3",
+        r"¯([bcdfghjklmnpqrstvwxyz]*)([aeiouɔ])([a-z]*)": r"-\1\2" + "\u0301" + r"\3",
+        r"\\([bcdfghjklmnpqrstvwxyz]*)([aeiouɔ])([a-z]*)": r"-\1\2" + "\u0302" + r"\3",
+        r"/([bcdfghjklmnpqrstvwxyz]*)([aeiouɔ])([a-z]*)": r"-\1\2" + "\u030c" + r"\3",
+        r"_([bcdfghjklmnpqrstvwxyz]*)([aeiouɔ])([a-z]*)": r"-\1\2" + "\u0300" + r"\3",
         r"^-": "",
         r"([\(\[])-": r"\1",
     })
@@ -85,14 +85,19 @@ class DictionaryConfig:
     """Configuration for dictionary processing."""
 
     # File paths
-    excel_file: Path = Path("vol_mundo_01.06.2023.xlsx")
+    excel_file: Path = Path("src/vol_mundo_01.06.2023.xlsx")
     output_folder: Path = Path("vol_mundo")
 
     # Processing options
-    columns: int = 30
+    columns: int = 32
     paiboon: bool = True
     debug: bool = False
     debug_test_1000_rows: bool = False
+
+    # Caching options
+    use_cache: bool = True
+    cache_file: Path = Path("cache.pkl")
+    force_refresh_cache: bool = False
 
     # Dictionary metadata
     title_en_th: str = "volubilis v074 (en-th)"

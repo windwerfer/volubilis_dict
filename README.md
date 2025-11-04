@@ -49,6 +49,25 @@ processor = DictionaryProcessor(config)
 processor.process_excel_file()
 ```
 
+### Caching
+
+The processor includes intelligent caching to speed up repeated processing:
+
+- **Automatic caching**: Processed data is cached to avoid reprocessing the same Excel file
+- **Cache validation**: Cache is invalidated when the Excel file changes or configuration changes
+- **Cache control**: Command-line options to disable or force refresh cache
+
+```bash
+# Use cache (default behavior)
+python -m src.main
+
+# Disable caching
+python -m src.main --no-cache
+
+# Force cache refresh
+python -m src.main --refresh-cache
+```
+
 ## Development
 
 ### Running Tests
@@ -109,10 +128,11 @@ The codebase has been completely rewritten with modern Python practices:
 ### Key Improvements
 
 1. **TextFormatter**: Handles all regex transformations and text processing
-2. **DictionaryProcessor**: Main Excel parsing and data processing logic
+2. **DictionaryProcessor**: Main Excel parsing and data processing logic with intelligent caching
 3. **FileHandler**: Safe file I/O with context managers
 4. **Config**: Centralized configuration with validation
 5. **Custom Exceptions**: Proper error handling hierarchy
+6. **Caching System**: Automatic caching with validation for faster development and testing
 
 ### Legacy Code
 

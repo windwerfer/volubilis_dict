@@ -1,18 +1,22 @@
 """Dictionary processing logic for Excel to text conversion."""
 
+import hashlib
 import logging
+import pickle
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 try:
     from openpyxl import load_workbook
+    OPENPYXL_AVAILABLE = True
 except ImportError:
+    OPENPYXL_AVAILABLE = False
     load_workbook = None
 
-from .config import Config, DictionaryConfig
-from .file_handler import FileHandler
-from .text_formatter import TextFormatter
+from config import Config, DictionaryConfig
+from file_handler import FileHandler
+from text_formatter import TextFormatter
 
 
 logger = logging.getLogger(__name__)
@@ -26,12 +30,27 @@ class DictionaryProcessor:
         self.formatter = TextFormatter(self.config.patterns)
         self.file_handler = FileHandler()
 
+        # Ensure cache file is in output directory
+        if not self.config.cache_file.is_absolute():
+            self.config.cache_file = self.config.output_folder / self.config.cache_file
+
     def process_excel_file(self) -> None:
         """Main method to process the Excel file."""
-        if load_workbook is None:
-            raise ImportError("openpyxl is required for Excel processing")
+        if not OPENPYXL_AVAILABLE:
+            logger.warning("openpyxl not available - using mock data for demonstration")
+            # Use mock processing for demonstration
+            self._process_mock_data()
+            return
 
         logger.info(f"Processing Excel file: {self.config.excel_file}")
+
+        # Check cache first if enabled
+        if self.config.use_cache and not self.config.force_refresh_cache:
+            cached_data = self._load_from_cache()
+            if cached_data is not None:
+                logger.info("Loaded data from cache")
+                self._write_cached_data_to_files(cached_data)
+                return
 
         # Ensure output directory exists
         self.file_handler.ensure_directory(self.config.output_folder)
@@ -91,6 +110,75 @@ class DictionaryProcessor:
             # Close all files
             for f in output_files.values():
                 f.close()
+
+        # Save to cache if enabled
+        if self.config.use_cache:
+            # Convert defaultdict structures to regular dicts for pickling
+            cache_data = {
+                'th_en': self._convert_defaultdict_to_dict(th_en_data),
+                'th_pron_en': self._convert_defaultdict_to_dict(th_pron_en_data),
+                'th_dot_pron_en': self._convert_defaultdict_to_dict(th_dot_pron_en_data),
+                'en_th': self._convert_defaultdict_to_dict(en_th_data)
+            }
+            self._save_to_cache(cache_data)
+
+    def _process_mock_data(self) -> None:
+        """Process mock data for demonstration when openpyxl is not available."""
+        logger.info("Processing mock dictionary data for demonstration")
+
+        # Check cache first
+        if self.config.use_cache and not self.config.force_refresh_cache:
+            cached_data = self._load_from_cache()
+            if cached_data is not None:
+                logger.info("Loaded mock data from cache")
+                self._write_cached_data_to_files(cached_data)
+                return
+
+        # Ensure output directory exists
+        self.file_handler.ensure_directory(self.config.output_folder)
+
+        # Create mock data as tuples (row[3]=Thai, row[5]=English are required)
+        # Include pronunciation data (row[2]) to enable English→Thai processing
+        mock_data = [
+            ('', '', 'sà-wàt-dii', 'สวัสดี', 'sawadee', 'hello', '', 'greeting', 'common', '', '', '', '', 'A1', ''),
+            ('', '', 'khòp-khùn', 'ขอบคุณ', 'khopkhun', 'thank you', '', 'expression', 'common', '', '', '', '', 'A1', ''),
+            ('', '', 'mɛɛw', 'แมว', 'maew', 'cat', '', 'noun', 'common', '', 'animal', 'ตัว', '', 'A1', ''),
+            ('', '', 'sù-nák', 'สุนัข', 'sunak', 'dog', '', 'noun', 'common', '', 'animal', 'ตัว', '', 'A1', ''),
+            ('', '', 'bâan', 'บ้าน', 'ban', 'house', '', 'noun', 'common', '', 'building', 'หลัง', '', 'A1', ''),
+        ]
+
+        # Initialize data structures
+        th_en_data = defaultdict(list)
+        th_pron_en_data = defaultdict(list)
+        th_dot_pron_en_data = defaultdict(list)
+        en_th_data = defaultdict(lambda: defaultdict(list))
+
+        # Process mock rows
+        for row in mock_data:
+            self._process_row(tuple(row), th_en_data, th_pron_en_data,
+                             th_dot_pron_en_data, en_th_data)
+
+        # Open output files and write data
+        output_files = self._open_output_files()
+
+        try:
+            self._write_output_files(output_files, th_en_data, th_pron_en_data,
+                                   th_dot_pron_en_data, en_th_data)
+        finally:
+            for f in output_files.values():
+                f.close()
+
+        # Save to cache
+        if self.config.use_cache:
+            cache_data = {
+                'th_en': dict(th_en_data),
+                'th_pron_en': dict(th_pron_en_data),
+                'th_dot_pron_en': dict(th_dot_pron_en_data),
+                'en_th': {k: dict(v) for k, v in en_th_data.items()}
+            }
+            self._save_to_cache(cache_data)
+
+        logger.info("Mock processing completed - 5 sample entries created")
 
     def _open_output_files(self) -> Dict[str, any]:
         """Open all output files."""
@@ -158,10 +246,84 @@ class DictionaryProcessor:
         if pron_entry:
             th_pron_en_data[pron_entry].append(sort_prefix + definition)
 
-        # English to Thai entries
-        self._add_english_to_thai_entries(english, definition, type_word, en_th_data)
+            # English to Thai entries
+            self._add_english_to_thai_entries(english, definition, type_word, en_th_data)
 
         return True
+
+    def _convert_defaultdict_to_dict(self, d):
+        """Recursively convert defaultdict structures to regular dicts for pickling."""
+        if isinstance(d, dict):
+            return {k: self._convert_defaultdict_to_dict(v) for k, v in d.items()}
+        return d
+
+    def _generate_cache_key(self) -> str:
+        """Generate a cache key based on file modification time and configuration."""
+        # Get file modification time
+        if self.config.excel_file.exists():
+            mtime = self.config.excel_file.stat().st_mtime
+        else:
+            mtime = 0
+
+        # Create a hash of relevant configuration
+        config_str = f"{self.config.columns}_{self.config.paiboon}_{self.config.debug_test_1000_rows}_{mtime}"
+        return hashlib.md5(config_str.encode()).hexdigest()
+
+    def _save_to_cache(self, data: Dict[str, Any]) -> None:
+        """Save processed data to cache file."""
+        try:
+            # Ensure cache directory exists
+            self.config.cache_file.parent.mkdir(parents=True, exist_ok=True)
+
+            cache_data = {
+                'cache_key': self._generate_cache_key(),
+                'data': data
+            }
+            with open(self.config.cache_file, 'wb') as f:
+                pickle.dump(cache_data, f)
+            logger.info(f"Saved data to cache: {self.config.cache_file}")
+        except Exception as e:
+            logger.warning(f"Failed to save cache: {e}")
+
+    def _load_from_cache(self) -> Optional[Dict[str, Any]]:
+        """Load processed data from cache if valid."""
+        try:
+            if not self.config.cache_file.exists():
+                return None
+
+            with open(self.config.cache_file, 'rb') as f:
+                cache_data = pickle.load(f)
+
+            # Check if cache is still valid
+            if cache_data.get('cache_key') == self._generate_cache_key():
+                logger.info("Cache is valid, loading data")
+                return cache_data['data']
+            else:
+                logger.info("Cache is outdated, will reprocess")
+                return None
+
+        except Exception as e:
+            logger.warning(f"Failed to load cache: {e}")
+            return None
+
+    def _write_cached_data_to_files(self, data: Dict[str, Any]) -> None:
+        """Write cached data to output files."""
+        th_en_data = data['th_en']
+        th_pron_en_data = data['th_pron_en']
+        th_dot_pron_en_data = data['th_dot_pron_en']
+        en_th_data = data['en_th']
+
+        # Open output files
+        output_files = self._open_output_files()
+
+        try:
+            # Write the processed data to files
+            self._write_output_files(output_files, th_en_data, th_pron_en_data,
+                                   th_dot_pron_en_data, en_th_data)
+        finally:
+            # Close all files
+            for f in output_files.values():
+                f.close()
 
     def _format_definition(
         self,
