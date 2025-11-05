@@ -371,7 +371,7 @@ class DictionaryProcessor:
                 definition += f'<span class="clf">classifier: {classifiers}</span> '
 
         # Add definition
-        english_synonyms = [s.strip() for s in english.split('|') if s.strip()]
+        english_synonyms = [s.strip() for s in english.split(';') if s.strip()]
         english_formatted = ', '.join(english_synonyms)
         definition += f'<br><span class="def">{english_formatted}</span><br>'
 
@@ -454,20 +454,21 @@ class DictionaryProcessor:
                 files['th_dot_pron_en'].write(f".{pron_word}\t{definition[2:]}\n")
 
         # English to Thai
+        import re
         for english_word, type_groups in en_th_data.items():
-            word_entry = f'<b>{english_word}</b><br> '
-
             # Sort types
             sorted_types = sorted(type_groups.items())
 
             type_entries = []
             for word_type, definitions in sorted_types:
                 definitions.sort()
-                def_text = "<br>".join(definitions[2:] for definitions in definitions)
+                def_text = "<br>".join(definition for definition in definitions)
+                # Remove the English def span for cleaner en-th
+                def_text = re.sub(r'<br><span class="def">.*?</span><br>', '', def_text)
                 if word_type.strip():
                     type_entries.append(f'<span class="type">{word_type}</span><br>{def_text}')
                 else:
                     type_entries.append(def_text)
 
-            word_entry += "<br>".join(type_entries)
+            word_entry = f'<span class="english"><strong>{english_word}</strong></span> <br>' + "<br>".join(type_entries)
             files['en_th'].write(f"{english_word}\t{word_entry}\n")
