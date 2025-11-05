@@ -350,12 +350,15 @@ class DictionaryProcessor:
                 definition += f'<span class="pron">[{self.formatter.format_final_pronunciation(pron_formatted, self.config.paiboon)}]</span> '
 
         # Add type and usage
-        definition += f'<span class="type">{type_word.lower()} {usage}</span> '
+        type_usage = f"{type_word.lower()} {usage}".strip()
+        if type_usage:
+            definition += f'<span class="type">{type_usage}</span> '
 
         # Add classifier
         if classif:
             classifiers = self.formatter.split_and_format_classifiers(classif, self.config.paiboon)
-            definition += f'<span class="clf">classifier: {classifiers}</span> '
+            if classifiers.strip():
+                definition += f'<span class="clf">classifier: {classifiers}</span> '
 
         # Add definition
         definition += f'<br><span class="def">{english}</span><br>'
@@ -363,14 +366,15 @@ class DictionaryProcessor:
         # Add synonyms
         if syn:
             synonyms = self.formatter.split_and_format_synonyms(syn, self.config.paiboon)
-            definition += f'<span class="syn">syn: {synonyms}</span><br>'
+            if synonyms.strip():
+                definition += f'<span class="syn">syn: {synonyms}</span><br>'
 
         # Add scientific name
-        if scient:
+        if scient and scient.strip():
             definition += f'<span class="science">scient: {scient}</span><br>'
 
         # Add note
-        if note:
+        if note and note.strip():
             definition += f'<span class="note">note: {note}</span><br>'
 
         # Add level
@@ -450,7 +454,10 @@ class DictionaryProcessor:
             for word_type, definitions in sorted_types:
                 definitions.sort()
                 def_text = "<br>".join(definitions[2:] for definitions in definitions)
-                type_entries.append(f'<span class="type">{word_type}</span><br>{def_text}')
+                if word_type.strip():
+                    type_entries.append(f'<span class="type">{word_type}</span><br>{def_text}')
+                else:
+                    type_entries.append(def_text)
 
             word_entry += "<br>".join(type_entries)
             files['en_th'].write(f"{english_word}\t{word_entry}\n")
