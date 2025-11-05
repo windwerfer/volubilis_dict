@@ -82,12 +82,37 @@ class StardictBuilder:
             if f.exists():
                 files_to_zip.append(f)
 
-        # Add res.zip if css.zip exists in txt dir
-        css_zip = self.txt_dir / "css.zip"
+        # Add res.zip with styles.css
         res_file = self.unzipped_dir / f"{base_name}.res.zip"
-        if css_zip.exists():
-            shutil.copy(css_zip, res_file)
-            files_to_zip.append(res_file)
+        import zipfile
+        with zipfile.ZipFile(res_file, 'w', zipfile.ZIP_DEFLATED) as zf:
+            # Add styles.css for HTML formatting
+            css_content = """\
+/* Light theme */
+.thai { font-weight: bold; color: #000080; }
+.pron { color: #008000; font-style: italic; }
+.def { }
+.syn { font-style: italic; color: #800080; }
+.science { color: #808000; font-size: smaller; }
+.note { color: #808080; font-size: smaller; }
+.english { font-weight: bold; color: #800000; }
+.type { font-style: italic; color: #000080; }
+.clf { font-style: italic; }
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+    body { background-color: #121212; color: #ffffff; }
+    .thai { color: #87ceeb; }
+    .pron { color: #90ee90; }
+    .syn { color: #dda0dd; }
+    .science { color: #f0e68c; }
+    .note { color: #d3d3d3; }
+    .english { color: #ff6347; }
+    .type { color: #87ceeb; }
+}
+"""
+            zf.writestr('styles.css', css_content)
+        files_to_zip.append(res_file)
 
         if not files_to_zip:
             raise FileNotFoundError(f"No files found for {base_name}")
