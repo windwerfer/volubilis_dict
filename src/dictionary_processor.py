@@ -3,6 +3,7 @@
 import hashlib
 import logging
 import pickle
+import re
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -76,13 +77,12 @@ class DictionaryProcessor:
                 elif i == 3: usage = "thai (word)"
                 elif i == 4: usage = "english (definition)"
                 elif i == 7: usage = "type_word"
-                elif i == 8: usage = "usage"
-                elif i == 9: usage = "scient"
-                elif i == 10: usage = "dom"
-                elif i == 11: usage = "classif"
-                elif i == 12: usage = "syn"
-                elif i == 13: usage = "level"
-                elif i == 14: usage = "note"
+                elif i == 8: usage = "scient"
+                elif i == 9: usage = "dom"
+                elif i == 10: usage = "classif"
+                elif i == 11: usage = "syn"
+                elif i == 12: usage = "level"
+                elif i == 13: usage = "note"
                 col_clean = str(col).replace('\n', ' ')
                 mapping_lines.append(f"{i}: {col_clean} -> {usage}")
             logger.info("Column mapping:\n" + "\n".join(mapping_lines))
@@ -239,6 +239,20 @@ class DictionaryProcessor:
         thai_synonyms = [s.strip() for s in thai.split(';') if s.strip()]
         english_synonyms = [s.strip() for s in english.split(';') if s.strip()]
 
+        # Extract additional synonyms from SYN column (Thai words in parentheses)
+        syn = self.formatter.clean_text(row[11] if len(row) > 11 else "")
+        if syn:
+            bracketed_matches = re.findall(r'\((.*?)\)', syn)
+            for match in bracketed_matches:
+                cleaned_match = match.strip()
+                if cleaned_match:
+                    # Check for Thai characters
+                    if re.search(r'[\u0E00-\u0E7F]', cleaned_match):
+                        # Ignore if contains spaces or invalid chars
+                        if ' ' not in cleaned_match and not re.search(r'[^\u0E00-\u0E7F]', cleaned_match):
+                            if cleaned_match not in thai_synonyms:
+                                thai_synonyms.append(cleaned_match)
+
         # Use joined synonyms for word keys
         thai_word = '|'.join(thai_synonyms) if thai_synonyms else thai
         english_word = '|'.join(english_synonyms) if english_synonyms else english
@@ -251,10 +265,10 @@ class DictionaryProcessor:
         usage = self.formatter.clean_text(row[8] if len(row) > 8 else "")
         scient = self.formatter.clean_text(row[9] if len(row) > 9 else "")
         dom = self.formatter.clean_text(row[10] if len(row) > 10 else "")
-        classif = self.formatter.clean_text(row[11] if len(row) > 11 else "")
-        syn = self.formatter.clean_text(row[12] if len(row) > 12 else "")
-        level = self.formatter.clean_text(row[13] if len(row) > 13 else "")
-        note = self.formatter.clean_text(row[14] if len(row) > 14 else "")
+        classif = self.formatter.clean_text(row[10] if len(row) > 10 else "")
+        syn = self.formatter.clean_text(row[11] if len(row) > 11 else "")
+        level = self.formatter.clean_text(row[12] if len(row) > 12 else "")
+        note = self.formatter.clean_text(row[13] if len(row) > 13 else "")
 
         # Format pronunciation
         pron_formatted = self.formatter.format_tones(thaiphon.lower(), self.config.paiboon)

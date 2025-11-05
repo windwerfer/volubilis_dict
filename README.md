@@ -246,9 +246,9 @@ The Excel file uses the following column mapping for data extraction:
 - 5: FRA (French) → unused
 - 6: TYPE → unused
 - 7: USAGE → type_word
-- 8: SCIENT/abbrev. → usage
-- 9: DOM → scient
-- 10: CLASSIF → dom
+- 8: SCIENT/abbrev. → scient
+- 9: DOM → dom
+- 10: CLASSIF → classif
 - 11: SYN → syn
 - 12: LEVEL → level
 - 13: NOTE → note
@@ -274,7 +274,7 @@ The Excel file uses the following column mapping for data extraction:
 - 33: ZHO1 (Chinese [simplified/traditional]) → unused
 - 34: ZHO2 (Chinese [Pinyin [effective]]) → unused
 
-Synonyms are extracted from column 11 (SYN), split by `;` and joined with `|` for headword synonyms in Stardict format.
+Synonyms are extracted from columns 3 (THA; split by `;`) and 11 (SYN; Thai words in parentheses), joined with `|` for headword synonyms in Stardict format.
 
 ---
 
