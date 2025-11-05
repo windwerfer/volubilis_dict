@@ -211,6 +211,17 @@ class DictionaryProcessor:
         thai = self.formatter.clean_text(row[3])
         english = self.formatter.clean_text(row[4])
 
+        # Split synonyms
+        thai_synonyms = [s.strip() for s in thai.split(';') if s.strip()]
+        english_synonyms = [s.strip() for s in english.split(';') if s.strip()]
+
+        # Use joined synonyms for word keys
+        thai_word = '|'.join(thai_synonyms) if thai_synonyms else thai
+        english_word = '|'.join(english_synonyms) if english_synonyms else english
+
+        # Use first synonym for display in definitions
+        thai_display = thai_synonyms[0] if thai_synonyms else thai
+
         # Additional columns
         type_word = self.formatter.clean_text(row[7] if len(row) > 7 else "")
         usage = self.formatter.clean_text(row[8] if len(row) > 8 else "")
@@ -224,30 +235,29 @@ class DictionaryProcessor:
         # Format pronunciation
         pron_formatted = self.formatter.format_tones(thaiphon.lower(), self.config.paiboon)
         pron_search = self.formatter.format_pronunciation_search(pron_formatted, self.config.paiboon)
-        pron_formatted = self.formatter.spaces_workaround_dictbox(pron_formatted)
 
         # Create pronunciation entry
         pron_entry = ""
-        if thaiphon:
-            pron_entry = f" - {thai}"
+        if thaiphon and thai_synonyms:
+            pron_entry = f" - {thai_display}"
 
         # Format definition
         definition = self._format_definition(
-            thai, pron_formatted, type_word, usage, classif, syn, scient, note, level, english, dom
+            thai_display, pron_formatted, type_word, usage, classif, syn, scient, note, level, english_word, dom
         )
 
         # Add sorting prefix for Thai-English
         sort_prefix = self._get_sort_prefix(level)
 
         # Thai to English entries
-        th_en_data[thai].append(sort_prefix + definition)
+        th_en_data[thai_word].append(sort_prefix + definition)
 
         # Thai with pronunciation to English
         if pron_entry:
             th_pron_en_data[pron_entry].append(sort_prefix + definition)
 
             # English to Thai entries
-            self._add_english_to_thai_entries(english, definition, type_word, en_th_data)
+            self._add_english_to_thai_entries(english_word, definition, type_word, en_th_data)
 
         return True
 
@@ -361,7 +371,9 @@ class DictionaryProcessor:
                 definition += f'<span class="clf">classifier: {classifiers}</span> '
 
         # Add definition
-        definition += f'<br><span class="def">{english}</span><br>'
+        english_synonyms = [s.strip() for s in english.split('|') if s.strip()]
+        english_formatted = ', '.join(english_synonyms)
+        definition += f'<br><span class="def">{english_formatted}</span><br>'
 
         # Add synonyms
         if syn:
@@ -414,11 +426,9 @@ class DictionaryProcessor:
         en_th_data: Dict
     ) -> None:
         """Add entries to English to Thai data structure."""
-        english_terms = [term.strip() for term in english.split(";") if term.strip()]
+        english_terms = [term.strip() for term in english.split("|") if term.strip()]
 
         for term in english_terms:
-            if type_word not in en_th_data[term]:
-                en_th_data[term][type_word] = []
             en_th_data[term][type_word].append(definition)
 
     def _write_output_files(
