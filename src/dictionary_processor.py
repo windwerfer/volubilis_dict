@@ -63,6 +63,30 @@ class DictionaryProcessor:
         ws = wb.active
         ws.reset_dimensions()
 
+        # Log column mapping from header row (second row)
+        rows = list(ws.values)
+        if len(rows) > 1:
+            header_row = rows[1]  # Second row (index 1)
+            mapping_lines = []
+            for i, col in enumerate(header_row):
+                usage = "unused"
+                if i == 0: usage = "thai_romanized"
+                elif i == 1: usage = "easythai"
+                elif i == 2: usage = "thaiphon (pronunciation)"
+                elif i == 3: usage = "thai (word)"
+                elif i == 4: usage = "english (definition)"
+                elif i == 7: usage = "type_word"
+                elif i == 8: usage = "usage"
+                elif i == 9: usage = "scient"
+                elif i == 10: usage = "dom"
+                elif i == 11: usage = "classif"
+                elif i == 12: usage = "syn"
+                elif i == 13: usage = "level"
+                elif i == 14: usage = "note"
+                col_clean = str(col).replace('\n', ' ')
+                mapping_lines.append(f"{i}: {col_clean} -> {usage}")
+            logger.info("Column mapping:\n" + "\n".join(mapping_lines))
+
         # Initialize data structures
         th_en_data = defaultdict(list)  # Thai to English
         th_pron_en_data = defaultdict(list)  # Thai with pronunciation to English

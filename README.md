@@ -2,12 +2,12 @@
 
  unofficial dictionary (stardict/mdict) files for the volubilis project (https://belisan-volubilis.blogspot.com).<br>
  <br>
- most recent version: 01.06.2023 (processed 2025-11-04).<br>
- <br>
+  most recent version: 01.11.2025 (processed 2025-11-05).<br>
+  <br>
 
 
- - 104'134 entries thai-english<br>
- - 102'618 entries english-thai<br>
+  - 106'141 entries thai-english<br>
+  - 95'944 entries english-thai<br>
  - thai pronounciation for most words, eg. ม้า [máa] n. classifier: ตัว
  - many expressions, like: ทิ้งไว้ [thíng wái] v. exp. leave behind ; leave undone<br>
  - **New**: HTML-formatted definitions with CSS styling for GoldenDict NG<br><br><br>
@@ -125,7 +125,7 @@ pyglossary vol_mundo/d_th-en.txt stardict_output/volubilis_th-en.ifo
 pyglossary vol_mundo/d_en-th.txt stardict_output/volubilis_en-th.ifo
 ```
 
-The latest Stardict files are available in `volubilis_stardict_2025-11-04.zip`.
+The latest Stardict files are available in the `stardict/` directory as individual zip packages.
 
 ## Development
 
@@ -226,14 +226,58 @@ there is a pronounciation search. eg .maa (the sound of the thai word) would fin
 
 this project converts the Volubilis Thai-English dictionary (released as spread sheat or pdf) to a standart dictionary format.<br><br><br>
 
-Readable through <a href='http://www.huzheng.org/stardict/'>Stardict</a> (win/linux), <a href='https://www.mdict.cn/'>Mdict</a> (android/ios), <a href='http://goldendict.org/'>GoldenDict</a> (win/linux/android), <a href='https://www.google.co.th/url?sa=t&source=web&rct=j&url=https://play.google.com/store/apps/details%3Fid%3Dcom.grandsons.dictboxxth%26hl%3Den%26gl%3DUS%26referrer%3Dutm_source%253Dgoogle%2526utm_medium%253Dorganic%2526utm_term%253Ddict%2Bbox%2Bapp%2Bstore%26pcampaignid%3DAPPU_1_nfq6Y6nnDfOgz7sPt-CzqAU&ved=2ahUKEwjpqcaUvbj8AhVz0HMBHTfwDFUQ8oQBegQIChAB&usg=AOvVaw0SlLHjPWaRVXbk4INevGNt'>Dictbox</a> (android 4-9)<br><br><br><br>
+ Readable through <a href='http://www.huzheng.org/stardict/'>Stardict</a> (win/linux), <a href='https://www.mdict.cn/'>Mdict</a> (android/ios), <a href='http://goldendict.org/'>GoldenDict</a> (win/linux/android), <a href='https://www.google.co.th/url?sa=t&source=web&rct=j&url=https://play.google.com/store/apps/details%3Fid%3Dcom.grandsons.dictboxxth%26hl%3Den%26gl%3DUS%26referrer%3Dutm_source%253Dgoogle%2526utm_medium%253Dorganic%2526utm_term%253Ddict%2Bbox%2Bapp%2Bstore%26pcampaignid%3DAPPU_1_nfq6Y6nnDfOgz7sPt-CzqAU&ved=2ahUKEwjpqcaUvbj8AhVz0HMBHTfwDFUQ8oQBegQIChAB&usg=AOvVaw0SlLHjPWaRVXbk4INevGNt'>Dictbox</a> (android 4-9)<br><br><br><br>
 
- <b>Install / use:</b>
- to be able to use the dictionary files, you need to download one of the dictionary apps from above and than download the compiled <a href='https://github.com/windwerfer/volubilis_dict/blob/main/volubilis_stardict_2025-11-04.zip'>stardict</a> or <a href='https://github.com/windwerfer/volubilis_dict/blob/main/volubilis_mdict-mdx_2023-06-01.zip'>mdict</a> files</a> (.mdx for Mdict, stardict for all others) and after extracting, copy them into the dictionary folder.<br><br>
+  <b>Install / use:</b>
+  to be able to use the dictionary files, you need to download one of the dictionary apps from above and then download the compiled Stardict zip packages from the `stardict/` directory (.ifo/.idx/.dict/.syn/.res.zip for Stardict/GoldenDict, convert to .mdx for Mdict) and after extracting, copy them into the dictionary folder.<br><br>
 
-**GoldenDict NG Users:** Extract `res.zip` to your GoldenDict NG data directory for automatic CSS styling with light/dark themes.<br><br><br><br><br><br><br><br>
+**GoldenDict NG Users:** Each Stardict zip package includes a `res.zip` with CSS for automatic styling with light/dark themes.<br><br><br><br><br><br><br><br>
+
+
+## Excel Column Mapping
+
+The Excel file uses the following column mapping for data extraction:
+
+- 0: THAIROM → thai_romanized
+- 1: EASYTHAI → easythai
+- 2: THAIPHON → thaiphon (pronunciation)
+- 3: THA (Thai) → thai (word)
+- 4: ENG (English) → english (definition)
+- 5: FRA (French) → unused
+- 6: TYPE → unused
+- 7: USAGE → type_word
+- 8: SCIENT/abbrev. → usage
+- 9: DOM → scient
+- 10: CLASSIF → dom
+- 11: SYN → syn
+- 12: LEVEL → level
+- 13: NOTE → note
+- 14: SPA (Spanish) → unused
+- 15: ITA (Italian) → unused
+- 16: POR (Portuguese) → unused
+- 17: DEU (German) → unused
+- 18: NLD (Dutch) → unused
+- 19: NOR (Norwegian [bokmål]) → unused
+- 20: TUR (Turkish) → unused
+- 21: MSA (Malay [Rumi script]) → unused
+- 22: IND (Indonesian) → unused
+- 23: FIL (Filipino [Tagalog (tgl)]) → unused
+- 24: VIE (Vietnamese [chữ quốc ngữ]) → unused
+- 25: RUS1 (Russian) → unused
+- 26: RUS2 (Russian [GOST romanization]) → unused
+- 27: LAO1 (Lao) → unused
+- 28: LAO2 (Lao) → unused
+- 29: TTS1 [Isan] → unused
+- 30: TTS2 [Isan] → unused
+- 31: KOR1 (Korean [Hangeul]) → unused
+- 32: KOR2 (Korean [Revised Romanization of Korean]) → unused
+- 33: ZHO1 (Chinese [simplified/traditional]) → unused
+- 34: ZHO2 (Chinese [Pinyin [effective]]) → unused
+
+Synonyms are extracted from column 11 (SYN), split by `;` and joined with `|` for headword synonyms in Stardict format.
 
 ---
+
 
 ## For Developers
 

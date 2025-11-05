@@ -42,6 +42,7 @@ class StardictBuilder:
         try:
             result = subprocess.run([
                 "pyglossary",
+                "--no-sqlite",
                 str(txt_file), str(output_file)
             ], capture_output=True, text=True, check=True)
 
