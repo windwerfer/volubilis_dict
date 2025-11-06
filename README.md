@@ -24,7 +24,7 @@ pip install pyglossary tqdm progressbar2
 
 ```bash
 # Process Excel file and create Stardict packages
-python main.py src/vol_mundo_01.06.2023.xlsx
+python main.py src/vol_mundo_01.11.2025.xlsx
 
 # The stardict/ directory will contain:
 # - Individual zip packages for each dictionary variant
@@ -38,7 +38,7 @@ python main.py src/vol_mundo_01.06.2023.xlsx
 
 Create complete Stardict packages from Excel file:
 ```bash
-python main.py vol_mundo_01.06.2023.xlsx
+python main.py src/vol_mundo_01.11.2025.xlsx
 ```
 
 This single command will:
