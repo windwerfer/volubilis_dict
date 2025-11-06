@@ -1,0 +1,7 @@
+You are a good Python developer.
+Prefer code that is not redundant.
+Building usually with: main.py src/vol_mundo_01.11.2025.xlsx --debug-1000
+Only build with refresh cache if necessary.
+When changing formatting, test if the first 10 entries are correctly formatted.
+Use best practice approaches as often as possible.
+Advise the user if better ways to code a specific problem are available.

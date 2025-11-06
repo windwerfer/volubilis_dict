@@ -275,9 +275,7 @@ class DictionaryProcessor:
         pron_search = self.formatter.format_pronunciation_search(pron_formatted, self.config.paiboon)
 
         # Create pronunciation entry
-        pron_entry = ""
-        if thaiphon and thai_synonyms:
-            pron_entry = f" - {thai_display}"
+        pron_entry = f"{pron_search} - {thai_word}"
 
         # Format definition
         definition = self._format_definition(
@@ -469,14 +467,7 @@ class DictionaryProcessor:
         for term in english_terms:
             en_th_data[term][type_word].append(definition)
 
-    def _write_output_files(
-        self,
-        files: Dict,
-        th_en_data: Dict,
-        th_pron_en_data: Dict,
-        th_dot_pron_en_data: Dict,
-        en_th_data: Dict
-    ) -> None:
+    def _write_output_files(self, files, th_en_data, th_pron_en_data, th_dot_pron_en_data, en_th_data):
         """Write all processed data to output files."""
         # Thai to English
         for thai_word, definitions in th_en_data.items():
