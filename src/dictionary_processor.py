@@ -461,8 +461,8 @@ class DictionaryProcessor:
         en_th_data: Dict
     ) -> None:
         """Add entries to English to Thai data structure."""
-        # For en-th, replace science span with description span without "scient: "
-        definition = re.sub(r'<span class="science">scient: (.*?)</span>', r'<span class="description">\1</span>', definition)
+        # For en-th, remove science span
+        definition = re.sub(r'<span class="science">scient: (.*?)</span>', '', definition)
 
         # Set description to full ENG field for complete meaning context, replace | with ,
         definition = re.sub(r'<span class="description">.*?</span>', f'<span class="description">{english.replace("|", ", ")}</span>', definition)
