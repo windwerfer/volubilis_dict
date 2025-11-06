@@ -5,3 +5,4 @@ Only build with refresh cache if necessary.
 When changing formatting, test if the first 10 entries are correctly formatted.
 Use best practice approaches as often as possible.
 Advise the user if better ways to code a specific problem are available.
+Important workflow: For en-th entries, the ENG field may contain multiple English definitions separated by '; ' or '|'. Split ENG by '|' to create headwords. For each headword, set the description in the Thai definition to the full unsplit ENG field, providing complete meaning context.
