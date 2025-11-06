@@ -94,8 +94,9 @@ class StardictBuilder:
 .pron { color: #008000; font-style: italic; }
 .def { }
 .syn { font-style: italic; color: #800080; }
-.science { color: #808000; font-size: smaller; }
+.description { }
 .note { color: #808080; font-size: smaller; }
+.level { font-size: smaller; }
 .english { font-weight: bold; color: #800000; }
 .type { font-style: italic; color: #000080; }
 .clf { font-style: italic; }
@@ -106,8 +107,11 @@ class StardictBuilder:
     .thai { color: #87ceeb; }
     .pron { color: #90ee90; }
     .syn { color: #dda0dd; }
-    .science { color: #f0e68c; }
+    .description { }
+    .science { font-size: smaller; }
+.science { font-size: smaller; }
     .note { color: #d3d3d3; }
+    .level { font-size: smaller; }
     .english { color: #ff6347; }
     .type { color: #87ceeb; }
 }

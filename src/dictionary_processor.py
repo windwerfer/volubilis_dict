@@ -407,8 +407,7 @@ class DictionaryProcessor:
                 definition += f'<span class="clf">classifier: {classifiers}</span> '
 
         # Add definition
-        english_synonyms = [s.strip() for s in english.split(';') if s.strip()]
-        english_formatted = ', '.join(english_synonyms)
+        english_formatted = english.replace("|", ", ").replace(";", ", ")
         definition += f'<br><span class="def">{english_formatted}</span><br>'
 
         # Add synonyms
@@ -419,7 +418,7 @@ class DictionaryProcessor:
 
         # Add scientific name
         if scient and scient.strip():
-            definition += f'<span class="science">scient: {scient}</span><br>'
+            definition += f'<span class="science">scient: {scient.replace("|", ", ")}</span><br>'
 
         # Add note
         if note and note.strip():
@@ -462,11 +461,11 @@ class DictionaryProcessor:
         en_th_data: Dict
     ) -> None:
         """Add entries to English to Thai data structure."""
-        # For en-th, replace science span with description span
+        # For en-th, replace science span with description span without "scient: "
         definition = re.sub(r'<span class="science">scient: (.*?)</span>', r'<span class="description">\1</span>', definition)
 
-        # Set description to full ENG field for complete meaning context
-        definition = re.sub(r'<span class="description">.*?</span>', f'<span class="description">{english}</span>', definition)
+        # Set description to full ENG field for complete meaning context, replace | with ,
+        definition = re.sub(r'<span class="description">.*?</span>', f'<span class="description">{english.replace("|", ", ")}</span>', definition)
 
         english_terms = [term.strip() for term in english.split("|") if term.strip()]
 
