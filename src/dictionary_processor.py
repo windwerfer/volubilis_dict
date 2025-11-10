@@ -236,8 +236,8 @@ class DictionaryProcessor:
         english = self.formatter.clean_text(row[4])
 
         # Split synonyms
-        thai_synonyms = [s.strip() for s in thai.split(';') if s.strip()]
-        english_synonyms = [s.strip() for s in english.split(';') if s.strip()]
+        thai_synonyms = [s.strip() for s in re.split(r'[;=]', thai) if s.strip()]
+        english_synonyms = [s.strip() for s in re.split(r'[;=]', english) if s.strip()]
 
         # Extract additional synonyms from SYN column (Thai words in parentheses)
         syn = self.formatter.clean_text(row[11] if len(row) > 11 else "")
