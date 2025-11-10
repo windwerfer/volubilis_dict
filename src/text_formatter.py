@@ -1,7 +1,7 @@
 """Text formatting utilities for dictionary processing."""
 
 import re
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from .config import RegexPatterns
 
@@ -85,3 +85,7 @@ class TextFormatter:
     def split_and_format_synonyms(self, synonyms: str, paiboon: bool = False) -> str:
         """Split synonym string by semicolon and format each part."""
         return self.split_and_format_classifiers(synonyms, paiboon)
+
+    def sort_thai_words_by_spelling_and_level(self, items: List[Tuple[str, str, str]], get_sort_prefix) -> List[Tuple[str, str, str]]:
+        """Sort list of (thai_word, level) by Thai spelling then level prefix."""
+        return sorted(items, key=lambda x: (x[0], get_sort_prefix(x[1])))

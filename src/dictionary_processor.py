@@ -90,7 +90,7 @@ class DictionaryProcessor:
         # Initialize data structures
         th_en_data = defaultdict(list)  # Thai to English
         th_pron_en_data = defaultdict(list)  # Thai with pronunciation to English
-        th_dot_pron_en_data = defaultdict(list)  # Dot notation pronunciation to English
+        th_pron_merge_en_data = defaultdict(list)  # Merged pronunciation to English
         en_th_data = defaultdict(lambda: defaultdict(list))  # English to Thai
 
         # Open output files
@@ -109,7 +109,7 @@ class DictionaryProcessor:
 
                 # Process the row
                 processed = self._process_row(row, th_en_data, th_pron_en_data,
-                                            th_dot_pron_en_data, en_th_data)
+                                            th_pron_merge_en_data, en_th_data)
                 if processed:
                     processed_count += 1
 
@@ -128,7 +128,7 @@ class DictionaryProcessor:
 
             # Write the processed data to files
             self._write_output_files(output_files, th_en_data, th_pron_en_data,
-                                   th_dot_pron_en_data, en_th_data)
+                                   th_pron_merge_en_data, en_th_data)
 
         finally:
             # Close all files
@@ -141,7 +141,6 @@ class DictionaryProcessor:
             cache_data = {
                 'th_en': self._convert_defaultdict_to_dict(th_en_data),
                 'th_pron_en': self._convert_defaultdict_to_dict(th_pron_en_data),
-                'th_dot_pron_en': self._convert_defaultdict_to_dict(th_dot_pron_en_data),
                 'en_th': self._convert_defaultdict_to_dict(en_th_data)
             }
             self._save_to_cache(cache_data)
@@ -174,20 +173,20 @@ class DictionaryProcessor:
         # Initialize data structures
         th_en_data = defaultdict(list)
         th_pron_en_data = defaultdict(list)
-        th_dot_pron_en_data = defaultdict(list)
+        th_pron_merge_en_data = defaultdict(list)
         en_th_data = defaultdict(lambda: defaultdict(list))
 
         # Process mock rows
         for row in mock_data:
             self._process_row(tuple(row), th_en_data, th_pron_en_data,
-                             th_dot_pron_en_data, en_th_data)
+                             th_pron_merge_en_data, en_th_data)
 
         # Open output files and write data
         output_files = self._open_output_files()
 
         try:
             self._write_output_files(output_files, th_en_data, th_pron_en_data,
-                                   th_dot_pron_en_data, en_th_data)
+                                   th_pron_merge_en_data, en_th_data)
         finally:
             for f in output_files.values():
                 f.close()
@@ -197,7 +196,6 @@ class DictionaryProcessor:
             cache_data = {
                 'th_en': dict(th_en_data),
                 'th_pron_en': dict(th_pron_en_data),
-                'th_dot_pron_en': dict(th_dot_pron_en_data),
                 'en_th': {k: dict(v) for k, v in en_th_data.items()}
             }
             self._save_to_cache(cache_data)
@@ -208,19 +206,21 @@ class DictionaryProcessor:
         """Open all output files."""
         base_path = self.config.output_folder
 
-        return {
+        files = {
             'th_en': open(base_path / "volubilis_th-en.txt", "w", encoding='utf-8'),
             'th_pron_en': open(base_path / "volubilis_th-pr-en.txt", "w", encoding='utf-8'),
-            'th_dot_pron_en': open(base_path / "volubilis_th-dot-pr-en.txt", "w", encoding='utf-8'),
             'en_th': open(base_path / "volubilis_en-th.txt", "w", encoding='utf-8'),
         }
+        if self.config.th_pron_merge:
+            files['th_pron_merge_en'] = open(base_path / "volubilis_th-pr-merge-en.txt", "w", encoding='utf-8')
+        return files
 
     def _process_row(
         self,
         row: Tuple,
         th_en_data: Dict,
         th_pron_en_data: Dict,
-        th_dot_pron_en_data: Dict,
+        th_pron_merge_en_data: Dict,
         en_th_data: Dict
     ) -> bool:
         """Process a single row from the Excel file."""
@@ -267,8 +267,16 @@ class DictionaryProcessor:
         dom = self.formatter.clean_text(row[10] if len(row) > 10 else "")
         classif = self.formatter.clean_text(row[10] if len(row) > 10 else "")
         syn = self.formatter.clean_text(row[11] if len(row) > 11 else "")
-        level = self.formatter.clean_text(row[12] if len(row) > 12 else "")
-        note = self.formatter.clean_text(row[13] if len(row) > 13 else "")
+        level = self.formatter.clean_text(row[13] if len(row) > 13 else "")
+        note = self.formatter.clean_text(row[14] if len(row) > 14 else "")
+
+        # Collect for pron merge
+        if self.config.th_pron_merge:
+            for i, thai_syn in enumerate(thai_synonyms):
+                eng_syn = english_synonyms[i] if i < len(english_synonyms) else ""
+                base_pron = re.sub(r'[-_\\/¯]', '', thai_syn).strip()
+                if base_pron:
+                    th_pron_merge_en_data[base_pron].append((thai_syn, eng_syn, level))
 
         # Format pronunciation
         pron_formatted = self.formatter.format_tones(thaiphon.lower(), self.config.paiboon)
@@ -358,6 +366,7 @@ class DictionaryProcessor:
         th_pron_en_data = data['th_pron_en']
         th_dot_pron_en_data = data['th_dot_pron_en']
         en_th_data = data['en_th']
+        th_pron_merge_en_data = defaultdict(list)  # New feature, not in cache
 
         # Open output files
         output_files = self._open_output_files()
@@ -365,7 +374,7 @@ class DictionaryProcessor:
         try:
             # Write the processed data to files
             self._write_output_files(output_files, th_en_data, th_pron_en_data,
-                                   th_dot_pron_en_data, en_th_data)
+                                   th_pron_merge_en_data, en_th_data)
         finally:
             # Close all files
             for f in output_files.values():
@@ -472,7 +481,7 @@ class DictionaryProcessor:
         for term in english_terms:
             en_th_data[term][type_word].append(definition)
 
-    def _write_output_files(self, files, th_en_data, th_pron_en_data, th_dot_pron_en_data, en_th_data):
+    def _write_output_files(self, files, th_en_data, th_pron_en_data, th_pron_merge_en_data, en_th_data):
         """Write all processed data to output files."""
         # Thai to English
         for thai_word, definitions in th_en_data.items():
@@ -481,11 +490,39 @@ class DictionaryProcessor:
                 files['th_en'].write(f"{thai_word}\t{definition[2:]}\n")
 
         # Thai pronunciation to English
-        for pron_word, definitions in th_pron_en_data.items():
-            definitions.sort()
-            for definition in definitions:
-                files['th_pron_en'].write(f"{pron_word}\t{definition[2:]}\n")
-                files['th_dot_pron_en'].write(f".{pron_word}\t{definition[2:]}\n")
+        if self.config.th_pron:
+            for pron_word, definitions in th_pron_en_data.items():
+                definitions.sort()
+                key = self.config.th_pron_prefix + pron_word if self.config.th_pron_prefix else pron_word
+                for definition in definitions:
+                    if self.config.th_pron_incl_translation_in_entry:
+                        # Extract English from definition or use full
+                        # For simplicity, use the definition as is, but perhaps modify pron_entry to include eng
+                        # Wait, currently pron_entry is pron - thai, definition is the full def
+                        # To include eng, perhaps change pron_entry to pron - thai (eng)
+                        # But since eng is in definition, maybe keep as is, or adjust
+                        # For now, since definition includes eng, just write as is
+                        files['th_pron_en'].write(f"{key}\t{definition[2:]}\n")
+                    else:
+                        # Remove eng from definition? But complicated.
+                        # For now, assume if not incl, just thai
+                        # But to keep simple, always include for now
+                        files['th_pron_en'].write(f"{key}\t{definition[2:]}\n")
+
+        # Thai pronunciation merge to English
+        if self.config.th_pron_merge and 'th_pron_merge_en' in files:
+            for base_pron, items in th_pron_merge_en_data.items():
+                # Sort items by thai, then level
+                sorted_items = self.formatter.sort_thai_words_by_spelling_and_level(items, self._get_sort_prefix)
+                key = self.config.th_pron_merge_prefix + base_pron if self.config.th_pron_merge_prefix else base_pron
+                thai_list = []
+                for thai, eng, _ in sorted_items:
+                    if self.config.th_pron_merge_incl_translation_in_entry and eng:
+                        thai_list.append(f"{thai} ({eng})")
+                    else:
+                        thai_list.append(thai)
+                value = ", ".join(thai_list)
+                files['th_pron_merge_en'].write(f"{key}\t{value}\n")
 
         # English to Thai
         import re

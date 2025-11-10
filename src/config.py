@@ -94,6 +94,14 @@ class DictionaryConfig:
     debug: bool = False
     debug_test_1000_rows: bool = False
 
+    # Pronunciation file options
+    th_pron: bool = True
+    th_pron_prefix: str = '.'
+    th_pron_incl_translation_in_entry: bool = True
+    th_pron_merge: bool = True
+    th_pron_merge_prefix: str = ','
+    th_pron_merge_incl_translation_in_entry: bool = True
+
     # Caching options
     use_cache: bool = True
     cache_file: Path = Path("cache.pkl")
@@ -103,6 +111,7 @@ class DictionaryConfig:
     title_en_th: str = "volubilis v074 (en-th)"
     title_th_en: str = "volubilis v074 (th-en)"
     title_th_pron_en: str = "volubilis v074 (.th-en)"
+    title_th_pron_merge_en: str = "volubilis v074 (,th-en)"
     description: str = (
         'description=Volubilis English-Thai dictionary by Belisan (Fr. Bastien)<br>'
         'พจนานุกรม วอลุบิลิส ภาษาอังกฤษ-ไทย<br>'
