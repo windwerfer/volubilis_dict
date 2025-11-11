@@ -105,7 +105,7 @@ def main() -> int:
 
     try:
         # Load configuration
-        config = Config()
+        config = Config.from_file()
 
         # Override config with command line arguments
         config.dictionary.excel_file = args.excel_file

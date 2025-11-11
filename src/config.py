@@ -1,8 +1,15 @@
 """Configuration management for the Volubilis dictionary processor."""
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
+
+try:
+    from dotenv import load_dotenv
+    DOTENV_AVAILABLE = True
+except ImportError:
+    DOTENV_AVAILABLE = False
 
 
 
@@ -113,14 +120,14 @@ class DictionaryConfig:
     force_refresh_cache: bool = False
 
     # Dictionary metadata
-    title_en_th: str = "volubilis v074 (en-th)"
-    title_th_en: str = "volubilis v074 (th-en)"
-    title_th_pron_en: str = "volubilis v074 (.th-en)"
-    title_th_pron_merge_en: str = "volubilis v074 (,th-en)"
+    title_en_th: str = "volubilis v2 (en-th)"
+    title_th_en: str = "volubilis v2 (th-en)"
+    title_th_pron_en: str = "volubilis v2 (.th-en)"
+    title_th_pron_merge_en: str = "volubilis v2 (,th-en)"
     description: str = (
         'description=Volubilis English-Thai dictionary by Belisan (Fr. Bastien)<br>'
         'พจนานุกรม วอลุบิลิส ภาษาอังกฤษ-ไทย<br>'
-        'v. 21.3 (1.11.2022) - 103 000  entr.<br>'
+        'v. 21.3 (1.11.2025) - 103 000  entr.<br>'
         '(http://belisan-volubilis.blogspot.com)<br><br>'
         'ā = long vowel "a"<br>'
         'start pronounciation search: type . (dot) plus searchterm (eg. .maa -> dog, horse,come,..)'
@@ -174,10 +181,47 @@ class Config:
 
     @classmethod
     def from_file(cls, config_path: Optional[Path] = None) -> 'Config':
-        """Load configuration from file (future enhancement)."""
-        # For now, return default config
-        # TODO: Implement TOML/YAML loading
-        return cls()
+        """Load configuration from environment variables or file."""
+        config = cls()
+
+        # Load .env file if available
+        if DOTENV_AVAILABLE:
+            load_dotenv(config_path or Path('.env'))
+
+        # Load from environment variables
+        config.dictionary.excel_file = Path(os.getenv('VOLUBILIS_EXCEL_FILE', str(config.dictionary.excel_file)))
+        config.dictionary.output_folder = Path(os.getenv('VOLUBILIS_OUTPUT_FOLDER', str(config.dictionary.output_folder)))
+        config.dictionary.columns = int(os.getenv('VOLUBILIS_COLUMNS', config.dictionary.columns))
+        config.dictionary.paiboon = os.getenv('VOLUBILIS_PAIBOON', str(config.dictionary.paiboon)).lower() == 'true'
+        config.dictionary.debug = os.getenv('VOLUBILIS_DEBUG', str(config.dictionary.debug)).lower() == 'true'
+        config.dictionary.debug_test_1000_rows = os.getenv('VOLUBILIS_DEBUG_TEST_1000_ROWS', str(config.dictionary.debug_test_1000_rows)).lower() == 'true'
+
+        # Pronunciation options
+        config.dictionary.th_pron = os.getenv('VOLUBILIS_TH_PRON', str(config.dictionary.th_pron)).lower() == 'true'
+        config.dictionary.th_pron_prefix = os.getenv('VOLUBILIS_TH_PRON_PREFIX', config.dictionary.th_pron_prefix)
+        config.dictionary.th_pron_incl_translation_in_headword = os.getenv('VOLUBILIS_TH_PRON_INCL_TRANSLATION', str(config.dictionary.th_pron_incl_translation_in_headword)).lower() == 'true'
+        config.dictionary.th_pron_merge = os.getenv('VOLUBILIS_TH_PRON_MERGE', str(config.dictionary.th_pron_merge)).lower() == 'true'
+        config.dictionary.th_pron_merge_prefix = os.getenv('VOLUBILIS_TH_PRON_MERGE_PREFIX', config.dictionary.th_pron_merge_prefix)
+        config.dictionary.th_pron_merge_incl_translation_in_headword = os.getenv('VOLUBILIS_TH_PRON_MERGE_INCL_TRANSLATION', str(config.dictionary.th_pron_merge_incl_translation_in_headword)).lower() == 'true'
+        config.dictionary.th_pron_max_headword_length = int(os.getenv('VOLUBILIS_TH_PRON_MAX_LENGTH', config.dictionary.th_pron_max_headword_length))
+        config.dictionary.th_pron_merge_max_headword_length = int(os.getenv('VOLUBILIS_TH_PRON_MERGE_MAX_LENGTH', config.dictionary.th_pron_merge_max_headword_length))
+
+        # MOBI options
+        config.dictionary.enable_mobi_build = os.getenv('VOLUBILIS_ENABLE_MOBI_BUILD', str(config.dictionary.enable_mobi_build)).lower() == 'true'
+
+        # Caching options
+        config.dictionary.use_cache = os.getenv('VOLUBILIS_USE_CACHE', str(config.dictionary.use_cache)).lower() == 'true'
+        config.dictionary.cache_file = Path(os.getenv('VOLUBILIS_CACHE_FILE', str(config.dictionary.cache_file)))
+        config.dictionary.force_refresh_cache = os.getenv('VOLUBILIS_FORCE_REFRESH_CACHE', str(config.dictionary.force_refresh_cache)).lower() == 'true'
+
+        # Metadata
+        config.dictionary.title_en_th = os.getenv('VOLUBILIS_TITLE_EN_TH', config.dictionary.title_en_th)
+        config.dictionary.title_th_en = os.getenv('VOLUBILIS_TITLE_TH_EN', config.dictionary.title_th_en)
+        config.dictionary.title_th_pron_en = os.getenv('VOLUBILIS_TITLE_TH_PRON_EN', config.dictionary.title_th_pron_en)
+        config.dictionary.title_th_pron_merge_en = os.getenv('VOLUBILIS_TITLE_TH_PRON_MERGE_EN', config.dictionary.title_th_pron_merge_en)
+        config.dictionary.description = os.getenv('VOLUBILIS_DESCRIPTION', config.dictionary.description)
+
+        return config
 
     def validate(self) -> None:
         """Validate configuration values."""

@@ -1,9 +1,9 @@
 # volubilis_dict
 
-  unofficial dictionary (stardict/mdict) files for the volubilis project (https://belisan-volubilis.blogspot.com).<br>
-  <br>
-   most recent version: 01.11.2025 (processed 2025-11-11).<br>
-   software version: 1.0.5<br>
+   unofficial dictionary (stardict/mdict/mobi) files for the volubilis project (https://belisan-volubilis.blogspot.com).<br>
+   <br>
+    most recent version: 01.11.2025 (processed 2025-11-11).<br>
+    software version: 1.1.0<br>
   <br>
 
 
@@ -11,8 +11,11 @@
   - 95'944 entries english-thai<br>
  - thai pronounciation for most words, eg. ม้า [máa] n. classifier: ตัว
  - many expressions, like: ทิ้งไว้ [thíng wái] v. exp. leave behind ; leave undone<br>
- - **New**: HTML-formatted definitions with CSS styling for GoldenDict NG<br>
- - **New**: Pronunciation-based search dictionaries (.pr and .pr-merge variants)<br><br><br>
+  - **New**: HTML-formatted definitions with CSS styling for GoldenDict NG<br>
+  - **New**: Pronunciation-based search dictionaries (.pr and .pr-merge variants)<br>
+  - **New**: Automatic MOBI file generation for Kindle using Calibre<br>
+  - **New**: Environment variable configuration support with .env files<br>
+  - **New**: Comprehensive unit test suite (50+ tests)<br><br><br>
 
 ## Installation
 
@@ -22,6 +25,8 @@ pip install -r requirements.txt
 pip install pyglossary tqdm progressbar2
 # Optional: for MOBI format generation (recommended)
 # Install Calibre from https://calibre-ebook.com/
+# Optional: for .env file support
+pip install python-dotenv
 ```
 
 ## Quick Start
@@ -72,7 +77,22 @@ options:
 
 ### Configuration
 
-The dictionary generation can be customized via `src/config.py`. Key options include:
+The dictionary generation can be customized via environment variables or `src/config.py`. A `.env` file is provided with all default values.
+
+#### Using Environment Variables
+
+1. Copy `.env` to your working directory
+2. Modify values as needed
+3. The application will automatically load these variables
+
+```bash
+# Example: Change output directory
+VOLUBILIS_OUTPUT_FOLDER=my_output python main.py src/vol_mundo_01.11.2025.xlsx
+```
+
+#### Configuration Options
+
+Key options include:
 
 #### Dictionary Processing
 - `columns`: Number of columns to process (default: 32)
@@ -100,7 +120,8 @@ The dictionary generation can be customized via `src/config.py`. Key options inc
 from src.config import Config
 from src.dictionary_processor import DictionaryProcessor
 
-config = Config()
+# Load configuration (supports environment variables)
+config = Config.from_file()
 processor = DictionaryProcessor(config)
 processor.process_excel_file()
 ```
@@ -115,7 +136,7 @@ The processor includes intelligent caching to speed up repeated processing:
 
 ```bash
 # Force cache refresh
-python -m src.main --refresh-cache
+python main.py src/vol_mundo_01.11.2025.xlsx --refresh-cache
 ```
 
 ## Dictionary Formats
@@ -182,14 +203,28 @@ Transfer these `.mobi` files directly to your Kindle device or use with Kindle a
 ### Running Tests
 
 ```bash
+# Run all tests
 pytest
+
+# Run with coverage
+pytest --cov=src --cov-report=html
+
+# Run specific test file
+pytest tests/test_config.py
+
+# Run tests with verbose output
+pytest -v
 ```
 
 ### Project Structure
 
 ```
 main.py                 # Root-level CLI entry point
+.env                    # Environment variable configuration template
 res.zip                 # CSS resources for GoldenDict NG
+requirements.txt        # Python dependencies
+setup.py               # Package setup
+pytest.ini            # Test configuration
 src/
 ├── __init__.py          # Package initialization
 ├── config.py            # Configuration management
@@ -222,12 +257,18 @@ mobi/                         # Kindle MOBI format files
 ├── volubilis_th-pr-en.mobi    # Thai with pronunciation MOBI (ready for Kindle)
 └── volubilis_th-pr-merge-en.mobi # Pronunciation-merged MOBI (ready for Kindle)
 
-tests/
-└── test_text_formatter.py  # Unit tests
+ tests/
+ ├── conftest.py          # Shared test fixtures
+ ├── test_config.py       # Configuration tests
+ ├── test_dictionary_processor.py  # Core processing tests
+ ├── test_stardict_builder.py     # Stardict building tests
+ ├── test_file_handler.py         # File I/O tests
+ ├── test_main.py         # CLI interface tests
+ └── test_text_formatter.py       # Text processing tests
 
-requirements.txt         # Python dependencies
-setup.py                # Package setup
-pytest.ini             # Test configuration
+ requirements.txt         # Python dependencies
+ setup.py                # Package setup
+ pytest.ini             # Test configuration
 ```
 src/
 ├── __init__.py          # Package initialization
@@ -254,18 +295,7 @@ stardict_output/         # Generated Stardict files
 ├── volubilis_en-th.dict
 └── ... (additional variants)
 
-mobi/                       # Kindle MOBI format directories
-├── volubilis_th-en.mobi     # Thai to English MOBI
-├── volubilis_en-th.mobi     # English to Thai MOBI
-├── volubilis_th-pr-en.mobi  # Thai with pronunciation MOBI
-└── volubilis_th-pr-merge-en.mobi # Pronunciation-merged MOBI
 
-vol_mundo/               # Processed tab-separated output
-├── d_th-en.txt
-├── d_en-th.txt
-├── d_th(pr)-en.txt
-├── d_th(dot+pr)-en.txt
-└── cache.pkl
 
 tests/
 └── test_text_formatter.py  # Unit tests
@@ -359,7 +389,7 @@ The codebase has been completely rewritten with modern Python practices:
 1. **TextFormatter**: Handles all regex transformations and text processing
 2. **DictionaryProcessor**: Main Excel parsing and data processing logic with intelligent caching
 3. **FileHandler**: Safe file I/O with context managers
-4. **Config**: Centralized configuration with validation
+4. **Config**: Centralized configuration with environment variable support
 5. **Custom Exceptions**: Proper error handling hierarchy
 6. **Caching System**: Automatic caching with validation for faster development and testing
 7. **HTML Conversion**: Transforms custom tags to standard HTML with CSS classes for modern dictionary apps
@@ -368,6 +398,10 @@ The codebase has been completely rewritten with modern Python practices:
 10. **Stardict Builder**: Integrated conversion and packaging system for professional distribution
 11. **Pronunciation Dictionaries**: Generates pronunciation-based search variants (.pr and .pr-merge)
 12. **Tone-Aware Sorting**: Pronunciation merge groups words by sound with proper tone ordering
+13. **MOBI Support**: Automatic Kindle .mobi file generation using Calibre
+14. **Environment Configuration**: Flexible configuration via .env files and environment variables
+15. **Comprehensive Testing**: Extensive unit test suite with 50+ tests covering all major components
+16. **Modern Python**: Type hints, dataclasses, and clean architecture throughout
 
 ### Legacy Code
 

@@ -121,9 +121,22 @@ class TestConfig:
         """Test full config validation."""
         config = Config()
         config.dictionary.excel_file = temp_dir / "test.xlsx"
-
-        # Create a dummy file for validation
-        config.dictionary.excel_file.touch()
+        config.dictionary.excel_file.touch()  # Create dummy file
 
         # Should not raise any errors
         config.validate()
+
+    def test_config_from_env_file(self, temp_dir, monkeypatch):
+        """Test loading config from environment variables."""
+        # Create a test .env file
+        env_file = temp_dir / ".env"
+        env_file.write_text("VOLUBILIS_ENABLE_MOBI_BUILD=false\nVOLUBILIS_COLUMNS=16\n")
+
+        # Change to temp directory and load config
+        monkeypatch.chdir(temp_dir)
+        config = Config.from_file(env_file)
+
+        assert config.dictionary.enable_mobi_build is False
+        assert config.dictionary.columns == 16
+        # Other values should remain defaults
+        assert config.dictionary.paiboon is True

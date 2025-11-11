@@ -1,3 +1,4 @@
 openpyxl>=3.0.0
 regex>=2020.0.0
 pytest>=7.0.0
+python-dotenv>=1.0.0
