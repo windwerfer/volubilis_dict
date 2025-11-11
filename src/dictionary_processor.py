@@ -270,14 +270,6 @@ class DictionaryProcessor:
         level = self.formatter.clean_text(row[13] if len(row) > 13 else "")
         note = self.formatter.clean_text(row[14] if len(row) > 14 else "")
 
-        # Collect for pron merge
-        if self.config.th_pron_merge:
-            for i, thai_syn in enumerate(thai_synonyms):
-                eng_syn = english_synonyms[i] if i < len(english_synonyms) else ""
-                base_pron = re.sub(r'[-_\\/¯\u0e48-\u0e4c]', '', thai_syn).strip()
-                if base_pron:
-                    th_pron_merge_en_data[base_pron].append((thai_syn, eng_syn, level))
-
         # Format pronunciation
         pron_formatted = self.formatter.format_tones(thaiphon.lower(), self.config.paiboon)
         pron_search = self.formatter.format_pronunciation_search(pron_formatted, self.config.paiboon)
@@ -296,6 +288,14 @@ class DictionaryProcessor:
         definition = self._format_definition(
             thai_display, pron_formatted, type_word, usage, classif, syn, scient, note, level, english_word, dom
         )
+
+        # Collect for pron merge
+        if self.config.th_pron_merge:
+            for i, thai_syn in enumerate(thai_synonyms):
+                eng_syn = english_synonyms[i] if i < len(english_synonyms) else ""
+                base_pron = pron_search
+                if base_pron:
+                    th_pron_merge_en_data[base_pron].append((thai_syn, eng_syn, level, definition))
 
         # Add sorting prefix for Thai-English
         sort_prefix = self._get_sort_prefix(level)
@@ -520,16 +520,19 @@ class DictionaryProcessor:
         if self.config.th_pron_merge and 'th_pron_merge_en' in files:
             for base_pron, items in th_pron_merge_en_data.items():
                 # Sort items by thai, then level
-                sorted_items = self.formatter.sort_thai_words_by_spelling_and_level(items, self._get_sort_prefix)
+                sorted_items = self.formatter.sort_thai_words_by_tone_and_level(items, self._get_sort_prefix)
                 key = self.config.th_pron_merge_prefix + base_pron if self.config.th_pron_merge_prefix else base_pron
                 key = key[:self.config.th_pron_merge_max_headword_length]
                 thai_list = []
-                for thai, eng, _ in sorted_items:
+                for thai, eng, _, _ in sorted_items:
                     if self.config.th_pron_merge_incl_translation_in_headword and eng:
                         thai_list.append(f"{thai} ({eng})")
                     else:
                         thai_list.append(thai)
-                value = ", ".join(thai_list)
+                headword_part = ", ".join(thai_list)
+                key = self.config.th_pron_merge_prefix + base_pron + " - " + headword_part
+                key = key[:self.config.th_pron_merge_max_headword_length]
+                value = sorted_items[0][3] if sorted_items else ""
                 files['th_pron_merge_en'].write(f"{key}\t{value}\n")
 
         # English to Thai

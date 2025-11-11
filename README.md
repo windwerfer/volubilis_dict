@@ -10,7 +10,8 @@
   - 95'944 entries english-thai<br>
  - thai pronounciation for most words, eg. ม้า [máa] n. classifier: ตัว
  - many expressions, like: ทิ้งไว้ [thíng wái] v. exp. leave behind ; leave undone<br>
- - **New**: HTML-formatted definitions with CSS styling for GoldenDict NG<br><br><br>
+ - **New**: HTML-formatted definitions with CSS styling for GoldenDict NG<br>
+ - **New**: Pronunciation-based search dictionaries (.pr and .pr-merge variants)<br><br><br>
 
 ## Installation
 
@@ -65,6 +66,19 @@ options:
   --no-cache            Disable caching of processed data
   --refresh-cache       Force refresh of cache even if valid
 ```
+
+### Configuration
+
+The dictionary generation can be customized via `src/config.py`. Key options include:
+
+- `th_pron`: Enable/disable pronunciation dictionary generation (default: True)
+- `th_pron_prefix`: Prefix for pronunciation headwords (default: '.')
+- `th_pron_incl_translation_in_headword`: Include English translations in pron headwords (default: True)
+- `th_pron_max_headword_length`: Maximum length for pron headwords (default: 40)
+- `th_pron_merge`: Enable/disable merged pronunciation dictionary (default: True)
+- `th_pron_merge_prefix`: Prefix for merged pron headwords (default: ',')
+- `th_pron_merge_incl_translation_in_headword`: Include translations in merge headwords (default: True)
+- `th_pron_merge_max_headword_length`: Maximum length for merge headwords (default: 40)
 
 ### Python API
 
@@ -164,7 +178,7 @@ stardict/               # Generated Stardict packages
 ├── volubilis_th-en.zip      # Thai to English package
 ├── volubilis_en-th.zip      # English to Thai package
 ├── volubilis_th-pr-en.zip   # Thai with pronunciation package
-└── volubilis_th-dot-pr-en.zip # Thai with dots/pronunciation package
+└── volubilis_th-pr-merge-en.zip # Pronunciation-merged Thai package
 
 tests/
 └── test_text_formatter.py  # Unit tests
@@ -222,7 +236,7 @@ the dictioanry is bilangual: Thai-English <br><br>
 and English-Thai has a Level to each word, judging how basic it is (B = basic, A1 = intermediate, A2 = advanced, s = special).<br><br><br>
 
 <img  style='width:80%;max-width:1445px;'  src='https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_pronouciation_search-dictbox_android.png'><br>
-there is a pronounciation search. eg .maa (the sound of the thai word) would find มา, ม้า and หมา. almost every word has a pronuciation entry.<br><br><br>
+ there is a pronounciation search. eg .maa (the sound of the thai word) would find มา, ม้า and หมา. almost every word has a pronuciation entry. The .pr-merge variant groups words by pronunciation, showing tone-variants together.<br><br><br>
 
 this project converts the Volubilis Thai-English dictionary (released as spread sheat or pdf) to a standart dictionary format.<br><br><br>
 
@@ -302,6 +316,8 @@ The codebase has been completely rewritten with modern Python practices:
 8. **GoldenDict NG Support**: Includes CSS themes with light/dark mode for enhanced readability
 9. **Automated Pipeline**: Single command creates complete Stardict packages with proper directory structure
 10. **Stardict Builder**: Integrated conversion and packaging system for professional distribution
+11. **Pronunciation Dictionaries**: Generates pronunciation-based search variants (.pr and .pr-merge)
+12. **Tone-Aware Sorting**: Pronunciation merge groups words by sound with proper tone ordering
 
 ### Legacy Code
 

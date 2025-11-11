@@ -86,6 +86,19 @@ class TextFormatter:
         """Split synonym string by semicolon and format each part."""
         return self.split_and_format_classifiers(synonyms, paiboon)
 
-    def sort_thai_words_by_spelling_and_level(self, items: List[Tuple[str, str, str]], get_sort_prefix) -> List[Tuple[str, str, str]]:
-        """Sort list of (thai_word, level) by Thai spelling then level prefix."""
-        return sorted(items, key=lambda x: (x[0], get_sort_prefix(x[1])))
+    def get_tone_priority(self, thai: str) -> int:
+        """Get tone priority for sorting: 0 mid, 1 low, 2 falling, 3 high, 4 rising."""
+        if '\u0e48' in thai:  # ่ low
+            return 1
+        elif '\u0e49' in thai:  # ้ falling
+            return 2
+        elif '\u0e4a' in thai:  # ๊ high
+            return 3
+        elif '\u0e4b' in thai:  # ๋ rising
+            return 4
+        else:
+            return 0  # mid
+
+    def sort_thai_words_by_tone_and_level(self, items: List[Tuple[str, str, str, str]], get_sort_prefix) -> List[Tuple[str, str, str, str]]:
+        """Sort list of (thai_word, eng, level) by tone priority then level prefix."""
+        return sorted(items, key=lambda x: (self.get_tone_priority(x[0]), get_sort_prefix(x[2])))
