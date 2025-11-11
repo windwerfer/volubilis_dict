@@ -532,7 +532,9 @@ class DictionaryProcessor:
                 headword_part = ", ".join(thai_list)
                 key = self.config.th_pron_merge_prefix + base_pron + " - " + headword_part
                 key = key[:self.config.th_pron_merge_max_headword_length]
-                value = sorted_items[0][3] if sorted_items else ""
+                # Merge all definitions with <br><br> separator
+                definitions = [item[3] for item in sorted_items if item[3]]
+                value = "<br><br>".join(definitions) if definitions else ""
                 files['th_pron_merge_en'].write(f"{key}\t{value}\n")
 
         # English to Thai

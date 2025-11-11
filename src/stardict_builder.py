@@ -29,6 +29,18 @@ class StardictBuilder:
         for txt_file in txt_files:
             self._convert_single_file(txt_file)
 
+    def convert_to_mobi(self) -> None:
+        """Convert all txt files to MOBI format for Kindle."""
+        mobi_dir = self.stardict_dir / "mobi"
+        mobi_dir.mkdir(parents=True, exist_ok=True)
+
+        txt_files = list(self.txt_dir.glob("volubilis_*.txt"))
+        if not txt_files:
+            raise FileNotFoundError(f"No txt files found in {self.txt_dir}")
+
+        for txt_file in txt_files:
+            self._convert_single_file_to_mobi(txt_file, mobi_dir)
+
     def _convert_single_file(self, txt_file: Path) -> None:
         """Convert a single txt file to Stardict format."""
         # Use the txt file stem as the output name
@@ -47,6 +59,9 @@ class StardictBuilder:
             ], capture_output=True, text=True, check=True)
 
             logger.debug(f"pyglossary output: {result.stdout}")
+
+            # Update the .ifo file with version and description
+            self._update_ifo_file(output_file)
 
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to convert {txt_file}: {e}")
@@ -70,6 +85,22 @@ class StardictBuilder:
             zip_files.append(zip_file)
 
         return zip_files
+
+    def _update_ifo_file(self, ifo_file: Path) -> None:
+        """Update the .ifo file with version and description."""
+        content = ifo_file.read_text(encoding='utf-8')
+        lines = content.split('\n')
+
+        updated_lines = []
+        for line in lines:
+            if line.startswith('version='):
+                updated_lines.append('version=1.0.5')
+            elif line.startswith('description='):
+                updated_lines.append('description=Volubilis Thai-English Dictionary v1.0.5 (data 01.11.2025)')
+            else:
+                updated_lines.append(line)
+
+        ifo_file.write_text('\n'.join(updated_lines), encoding='utf-8')
 
     def _create_single_zip(self, ifo_file: Path) -> Path:
         """Create a zip package for a single dictionary."""

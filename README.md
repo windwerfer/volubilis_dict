@@ -1,8 +1,9 @@
 # volubilis_dict
 
- unofficial dictionary (stardict/mdict) files for the volubilis project (https://belisan-volubilis.blogspot.com).<br>
- <br>
-  most recent version: 01.11.2025 (processed 2025-11-05).<br>
+  unofficial dictionary (stardict/mdict) files for the volubilis project (https://belisan-volubilis.blogspot.com).<br>
+  <br>
+   most recent version: 01.11.2025 (processed 2025-11-11).<br>
+   software version: 1.0.5<br>
   <br>
 
 
@@ -195,7 +196,7 @@ src/
 ├── text_formatter.py    # Text processing and regex transformations
 ├── dictionary_processor.py  # Main Excel processing logic
 ├── main.py              # CLI interface
-├── vol_mundo_01.06.2023.xlsx  # Source Excel file
+├── vol_mundo_01.11.2025.xlsx  # Source Excel file
 ├── readme.txt           # Legacy documentation
 ├── convert_tabTxt_to_mdxTxt.py  # Legacy MDX conversion
 └── main__excel_extract_columns_to_txt-v10.py  # Legacy processing script
@@ -226,7 +227,7 @@ requirements.txt         # Python dependencies
 setup.py                # Package setup
 pytest.ini             # Test configuration
 res.zip                 # CSS resources for GoldenDict NG
-volubilis_stardict_2025-11-04.zip  # Latest Stardict package
+volubilis_stardict_2025-11-11.zip  # Latest Stardict package
 ```
 
 <img  style='width:90%;max-width:1445px;'  src='https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_thai_lookup.png'><br>
