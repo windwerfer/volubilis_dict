@@ -261,10 +261,10 @@ class DictionaryProcessor:
         thai_display = thai_synonyms[0] if thai_synonyms else thai
 
         # Additional columns
-        type_word = self.formatter.clean_text(row[7] if len(row) > 7 else "")
-        usage = self.formatter.clean_text(row[8] if len(row) > 8 else "")
-        scient = self.formatter.clean_text(row[9] if len(row) > 9 else "")
-        dom = self.formatter.clean_text(row[10] if len(row) > 10 else "")
+        type_word = self.formatter.clean_text(row[6] if len(row) > 6 else "")
+        usage = self.formatter.clean_text(row[7] if len(row) > 7 else "")
+        scient = self.formatter.clean_text(row[8] if len(row) > 8 else "")
+        dom = self.formatter.clean_text(row[9] if len(row) > 9 else "")
         classif = self.formatter.clean_text(row[10] if len(row) > 10 else "")
         syn = self.formatter.clean_text(row[11] if len(row) > 11 else "")
         level = self.formatter.clean_text(row[12] if len(row) > 12 else "")
@@ -308,7 +308,7 @@ class DictionaryProcessor:
             th_pron_en_data[pron_headword].append(sort_prefix + definition)
 
             # English to Thai entries
-            self._add_english_to_thai_entries(english_word, definition, level, en_th_data)
+            self._add_english_to_thai_entries(english_word, definition, type_word, en_th_data)
 
         return True
 
@@ -474,7 +474,7 @@ class DictionaryProcessor:
         self,
         english: str,
         definition: str,
-        level: str,
+        type_word: str,
         en_th_data: Dict
     ) -> None:
         """Add entries to English to Thai data structure."""
@@ -486,7 +486,7 @@ class DictionaryProcessor:
         english_terms = [term.strip() for term in english.split("|") if term.strip()]
 
         for term in english_terms:
-            en_th_data[term][level].append(definition)
+            en_th_data[term][type_word].append(definition)
 
     def _write_output_files(self, files, th_en_data, th_pron_en_data, th_pron_merge_en_data, en_th_data):
         """Write all processed data to output files."""
@@ -548,7 +548,10 @@ class DictionaryProcessor:
                 definitions.sort()
                 #definitions = [d[:-4] if d.endswith('<br>') else d for d in definitions]
                 def_text = " ".join(definitions)
-                type_entries.append(def_text)
+                if word_type.strip():
+                    type_entries.append(f'<span class="word_type">{word_type}</span><br>{def_text}')
+                else:
+                    type_entries.append(def_text)
 
             word_definition = f'<span class="english"><strong>{english_word}</strong></span> <br>' + "<br>".join(type_entries)
             files['en_th'].write(f"{english_word}\t{word_definition}\n")
