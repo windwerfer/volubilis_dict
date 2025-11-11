@@ -20,6 +20,8 @@
 pip install -r requirements.txt
 # Optional: for Stardict format conversion
 pip install pyglossary tqdm progressbar2
+# Optional: for MOBI format generation (recommended)
+# Install Calibre from https://calibre-ebook.com/
 ```
 
 ## Quick Start
@@ -72,14 +74,25 @@ options:
 
 The dictionary generation can be customized via `src/config.py`. Key options include:
 
+#### Dictionary Processing
+- `columns`: Number of columns to process (default: 32)
+- `paiboon`: Enable Paiboon transcription system (default: True)
+- `debug_test_1000_rows`: Process only first 1000 rows for testing (default: True)
+
+#### Pronunciation Dictionaries
 - `th_pron`: Enable/disable pronunciation dictionary generation (default: True)
 - `th_pron_prefix`: Prefix for pronunciation headwords (default: '.')
 - `th_pron_incl_translation_in_headword`: Include English translations in pron headwords (default: True)
-- `th_pron_max_headword_length`: Maximum length for pron headwords (default: 40)
+- `th_pron_max_headword_length`: Maximum length for pron headwords (default: 50)
 - `th_pron_merge`: Enable/disable merged pronunciation dictionary (default: True)
 - `th_pron_merge_prefix`: Prefix for merged pron headwords (default: ',')
-- `th_pron_merge_incl_translation_in_headword`: Include translations in merge headwords (default: True)
-- `th_pron_merge_max_headword_length`: Maximum length for merge headwords (default: 40)
+- `th_pron_merge_incl_translation_in_headword`: Include translations in merge headwords (default: False)
+- `th_pron_merge_max_headword_length`: Maximum length for merge headwords (default: 50)
+
+#### MOBI Build Options
+- `enable_mobi_build`: Enable/disable MOBI file generation for Kindle (default: True)
+  - **Requires**: Calibre (`ebook-convert` command) must be installed
+  - **Output**: Creates `.mobi` files in `stardict/mobi/` directory
 
 ### Python API
 
@@ -140,7 +153,29 @@ pyglossary vol_mundo/d_th-en.txt stardict_output/volubilis_th-en.ifo
 pyglossary vol_mundo/d_en-th.txt stardict_output/volubilis_en-th.ifo
 ```
 
-The latest Stardict files are available in the `stardict/` directory as individual zip packages. MOBI files for Kindle are in the `mobi/` directory.
+The latest Stardict files are available in the `stardict/` directory as individual zip packages.
+
+### MOBI Format for Kindle
+
+MOBI files for Kindle are automatically generated when `enable_mobi_build = True` in the configuration.
+
+**Requirements:**
+- Install [Calibre](https://calibre-ebook.com/) (provides the `ebook-convert` command)
+- Ensure `ebook-convert` is in your PATH
+
+**Usage:**
+```bash
+# MOBI files are created automatically during build
+python main.py src/vol_mundo_01.11.2025.xlsx
+
+# Files will be available in stardict/mobi/:
+# - volubilis_th-en.mobi
+# - volubilis_en-th.mobi
+# - volubilis_th-pr-en.mobi
+# - volubilis_th-pr-merge-en.mobi
+```
+
+Transfer these `.mobi` files directly to your Kindle device or use with Kindle apps.
 
 ## Development
 
@@ -181,15 +216,11 @@ stardict/               # Generated Stardict packages
 ├── volubilis_th-pr-en.zip   # Thai with pronunciation package
 └── volubilis_th-pr-merge-en.zip # Pronunciation-merged Thai package
 
-mobi/                         # Kindle MOBI format directories
-├── volubilis_th-en.mobi/      # Thai to English MOBI (raw OEBPS)
-├── volubilis_en-th.mobi/      # English to Thai MOBI (raw OEBPS)
-├── volubilis_th-pr-en.mobi/   # Thai with pronunciation MOBI (raw OEBPS)
-├── volubilis_th-pr-merge-en.mobi/ # Pronunciation-merged MOBI (raw OEBPS)
-├── volubilis_th-en.epub       # Thai to English EPUB (can be converted to MOBI)
-├── volubilis_en-th.epub       # English to Thai EPUB
-├── volubilis_th-pr-en.epub    # Thai with pronunciation EPUB
-└── volubilis_th-pr-merge-en.epub # Pronunciation-merged EPUB
+mobi/                         # Kindle MOBI format files
+├── volubilis_th-en.mobi       # Thai to English MOBI (ready for Kindle)
+├── volubilis_en-th.mobi       # English to Thai MOBI (ready for Kindle)
+├── volubilis_th-pr-en.mobi    # Thai with pronunciation MOBI (ready for Kindle)
+└── volubilis_th-pr-merge-en.mobi # Pronunciation-merged MOBI (ready for Kindle)
 
 tests/
 └── test_text_formatter.py  # Unit tests
@@ -264,7 +295,7 @@ this project converts the Volubilis Thai-English dictionary (released as spread 
 
 **GoldenDict NG Users:** Each Stardict zip package includes a `res.zip` with CSS for automatic styling with light/dark themes.<br><br>
 
-**Kindle Users:** The `mobi/` folder contains raw MOBI files (OEBPS format) and packaged EPUB files. Use Calibre or an online converter to create proper .mobi files from the .epub files.<br><br><br><br><br><br><br>
+**Kindle Users:** The `stardict/mobi/` folder contains ready-to-use `.mobi` files created with Calibre. These can be directly transferred to your Kindle device or used with Kindle apps.<br><br><br><br><br><br><br>
 
 
 ## Excel Column Mapping
