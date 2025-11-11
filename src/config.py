@@ -105,7 +105,7 @@ class DictionaryConfig:
     th_pron_merge_max_headword_length: int = 50
 
     # MOBI build options (requires calibre to be installed)
-    enable_mobi_build: bool = True
+    enable_mobi_build: bool = False
 
     # Caching options
     use_cache: bool = True
