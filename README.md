@@ -141,6 +141,36 @@ python main.py src/vol_mundo_01.11.2025.xlsx --refresh-cache
 
 ## Dictionary Formats
 
+### Output File Structures
+
+The processor generates four main dictionary variants in tab-separated format (`headword<TAB>definition`):
+
+#### Thai to English (volubilis_th-en.txt)
+- **Headword**: Thai word (may include synonyms joined with `|`)
+- **Definition**: HTML-formatted entry containing:
+  - Thai word display
+  - Pronunciation in brackets
+  - Word type and usage
+  - English definition
+  - Synonyms, scientific names, notes, level information
+
+#### Thai Pronunciation to English (volubilis_th-pr-en.txt)
+- **Headword**: Pronunciation-prefixed format (`.pronunciation - thai_word`)
+- **Definition**: Same HTML format as Thai to English
+
+#### English to Thai (volubilis_en-th.txt)
+- **Headword**: English word (may include synonyms joined with `|`)
+- **Definition**: HTML-formatted entry containing:
+  - English headword
+  - Thai equivalent(s) with pronunciation
+  - **Nested English definition** of each Thai word (providing complete context)
+  - Word type, usage, and metadata
+  - Multiple Thai words for the same English headword are listed separately
+
+#### Pronunciation-Merged Thai to English (volubilis_th-pr-merge-en.txt)
+- **Headword**: Merged format (`,pronunciation - thai_word1, thai_word2, ...`)
+- **Definition**: Combined HTML definitions for all words sharing the same pronunciation, separated by `<br><br>`
+
 ### HTML Format for GoldenDict NG
 
 The processed dictionary uses standard HTML with CSS classes instead of custom tags:
@@ -168,10 +198,10 @@ Convert tab-separated output to Stardict format:
 pip install pyglossary
 
 # Convert Thai-English
-pyglossary vol_mundo/d_th-en.txt stardict_output/volubilis_th-en.ifo
+pyglossary stardict/txt/volubilis_th-en.txt stardict_output/volubilis_th-en.ifo
 
 # Convert English-Thai
-pyglossary vol_mundo/d_en-th.txt stardict_output/volubilis_en-th.ifo
+pyglossary stardict/txt/volubilis_en-th.txt stardict_output/volubilis_en-th.ifo
 ```
 
 The latest Stardict files are available in the `stardict/` directory as individual zip packages.
@@ -239,8 +269,10 @@ stardict/               # Generated Stardict packages
 ├── txt/                 # Intermediate files
 │   ├── css.zip          # CSS resources (copied from root)
 │   ├── cache.pkl        # Processing cache
-│   ├── d_en-th.txt      # Tab-separated data files
-│   └── ...
+│   ├── volubilis_en-th.txt      # English to Thai (tab-separated)
+│   ├── volubilis_th-en.txt      # Thai to English (tab-separated)
+│   ├── volubilis_th-pr-en.txt   # Thai pronunciation to English (tab-separated)
+│   └── volubilis_th-pr-merge-en.txt # Pronunciation-merged Thai to English (tab-separated)
 ├── unzipped/            # Raw Stardict files
 │   ├── volubilis_th-en.ifo
 │   ├── volubilis_th-en.idx

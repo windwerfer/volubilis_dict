@@ -9,3 +9,9 @@ Important workflow: For en-th entries, the ENG field may contain multiple Englis
 Terminology Clarification:
 • "Scient" refers to the scientific/domain tags (e.g., "MEDIC", "RELIGIO").
 • "Definition" could mean the English translation (ENG field) or the HTML description span.
+
+Output File Structures:
+• volubilis_th-en.txt: Thai headword → HTML definition (Thai word + pronunciation + English translation + metadata)
+• volubilis_th-pr-en.txt: Pronunciation-prefixed headword (.pronunciation - thai) → HTML definition
+• volubilis_en-th.txt: English headword → HTML definition with nested Thai equivalents (Thai word + pronunciation + English definition)
+• volubilis_th-pr-merge-en.txt: Merged pronunciation headword (,pronunciation - thai1, thai2, ...) → merged HTML definitions

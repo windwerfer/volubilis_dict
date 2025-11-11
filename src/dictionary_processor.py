@@ -267,8 +267,8 @@ class DictionaryProcessor:
         dom = self.formatter.clean_text(row[10] if len(row) > 10 else "")
         classif = self.formatter.clean_text(row[10] if len(row) > 10 else "")
         syn = self.formatter.clean_text(row[11] if len(row) > 11 else "")
-        level = self.formatter.clean_text(row[13] if len(row) > 13 else "")
-        note = self.formatter.clean_text(row[14] if len(row) > 14 else "")
+        level = self.formatter.clean_text(row[12] if len(row) > 12 else "")
+        note = self.formatter.clean_text(row[13] if len(row) > 13 else "")
 
         # Format pronunciation
         pron_formatted = self.formatter.format_tones(thaiphon.lower(), self.config.paiboon)
@@ -308,7 +308,7 @@ class DictionaryProcessor:
             th_pron_en_data[pron_headword].append(sort_prefix + definition)
 
             # English to Thai entries
-            self._add_english_to_thai_entries(english_word, definition, type_word, en_th_data)
+            self._add_english_to_thai_entries(english_word, definition, level, en_th_data)
 
         return True
 
@@ -435,16 +435,18 @@ class DictionaryProcessor:
         if scient and scient.strip():
             definition += f'<span class="science">scient: {scient.replace("|", ", ")}</span><br>'
 
-        # Add note
-        if note and note.strip():
-            definition += f'<span class="note">note: {note}</span><br>'
-
         # Add level
         level_info = self._format_level_info(level, dom)
         if level_info:
             definition += level_info
+            definition += '<br>'
+
+        # Add note
+        if note and note.strip():
+            definition += f'<span class="note">note: {note}</span><br>'
 
         return definition
+
 
     def _get_sort_prefix(self, level: str) -> str:
         """Get sorting prefix based on level."""
@@ -472,12 +474,11 @@ class DictionaryProcessor:
         self,
         english: str,
         definition: str,
-        type_word: str,
+        level: str,
         en_th_data: Dict
     ) -> None:
         """Add entries to English to Thai data structure."""
-        # For en-th, remove science span
-        definition = re.sub(r'<span class="science">scient: (.*?)</span>', '', definition)
+
 
         # Set description to full ENG field for complete meaning context, replace | with ,
         definition = re.sub(r'<span class="description">.*?</span>', f'<span class="description">{english.replace("|", ", ")}</span>', definition)
@@ -485,7 +486,7 @@ class DictionaryProcessor:
         english_terms = [term.strip() for term in english.split("|") if term.strip()]
 
         for term in english_terms:
-            en_th_data[term][type_word].append(definition)
+            en_th_data[term][level].append(definition)
 
     def _write_output_files(self, files, th_en_data, th_pron_en_data, th_pron_merge_en_data, en_th_data):
         """Write all processed data to output files."""
@@ -545,13 +546,9 @@ class DictionaryProcessor:
             type_entries = []
             for word_type, definitions in sorted_types:
                 definitions.sort()
-                def_text = "<br>".join(definition for definition in definitions)
-                # Remove the English def span for cleaner en-th
-                def_text = re.sub(r'<br><span class="def">.*?</span><br>', '', def_text)
-                if word_type.strip():
-                    type_entries.append(f'<span class="type">{word_type}</span><br>{def_text}')
-                else:
-                    type_entries.append(def_text)
+                #definitions = [d[:-4] if d.endswith('<br>') else d for d in definitions]
+                def_text = " ".join(definitions)
+                type_entries.append(def_text)
 
             word_definition = f'<span class="english"><strong>{english_word}</strong></span> <br>' + "<br>".join(type_entries)
             files['en_th'].write(f"{english_word}\t{word_definition}\n")
