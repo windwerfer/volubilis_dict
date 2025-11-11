@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+import subprocess
 import sys
 from pathlib import Path
 
@@ -133,10 +134,25 @@ def main() -> int:
         logging.info("Creating zip packages...")
         zip_files = builder.create_zip_packages()
 
+        # Convert to MOBI format if enabled and calibre is available
+        if config.dictionary.enable_mobi_build:
+            import shutil
+            if shutil.which("ebook-convert"):
+                logging.info("Converting to MOBI format...")
+                builder.convert_to_mobi()
+            else:
+                logging.warning("Calibre not found - skipping MOBI conversion")
+
         logging.info("Processing completed successfully")
         logging.info(f"Created {len(zip_files)} Stardict packages:")
         for zip_file in zip_files:
             logging.info(f"  - {zip_file}")
+
+        # Final check for MOBI build requirements
+        if config.dictionary.enable_mobi_build:
+            import shutil
+            if not shutil.which("ebook-convert"):
+                print("\033[91mError: calibre not found. Please install calibre to build MOBI files.\033[0m")
 
         return 0
 

@@ -92,7 +92,7 @@ class DictionaryConfig:
     columns: int = 32
     paiboon: bool = True
     debug: bool = False
-    debug_test_1000_rows: bool = False
+    debug_test_1000_rows: bool = True
 
     # Pronunciation file options
     th_pron: bool = True
@@ -103,6 +103,9 @@ class DictionaryConfig:
     th_pron_merge_incl_translation_in_headword: bool = False
     th_pron_max_headword_length: int = 50
     th_pron_merge_max_headword_length: int = 50
+
+    # MOBI build options (requires calibre to be installed)
+    enable_mobi_build: bool = True
 
     # Caching options
     use_cache: bool = True

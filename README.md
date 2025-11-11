@@ -140,7 +140,7 @@ pyglossary vol_mundo/d_th-en.txt stardict_output/volubilis_th-en.ifo
 pyglossary vol_mundo/d_en-th.txt stardict_output/volubilis_en-th.ifo
 ```
 
-The latest Stardict files are available in the `stardict/` directory as individual zip packages.
+The latest Stardict files are available in the `stardict/` directory as individual zip packages. MOBI files for Kindle are in the `mobi/` directory.
 
 ## Development
 
@@ -181,6 +181,16 @@ stardict/               # Generated Stardict packages
 ├── volubilis_th-pr-en.zip   # Thai with pronunciation package
 └── volubilis_th-pr-merge-en.zip # Pronunciation-merged Thai package
 
+mobi/                         # Kindle MOBI format directories
+├── volubilis_th-en.mobi/      # Thai to English MOBI (raw OEBPS)
+├── volubilis_en-th.mobi/      # English to Thai MOBI (raw OEBPS)
+├── volubilis_th-pr-en.mobi/   # Thai with pronunciation MOBI (raw OEBPS)
+├── volubilis_th-pr-merge-en.mobi/ # Pronunciation-merged MOBI (raw OEBPS)
+├── volubilis_th-en.epub       # Thai to English EPUB (can be converted to MOBI)
+├── volubilis_en-th.epub       # English to Thai EPUB
+├── volubilis_th-pr-en.epub    # Thai with pronunciation EPUB
+└── volubilis_th-pr-merge-en.epub # Pronunciation-merged EPUB
+
 tests/
 └── test_text_formatter.py  # Unit tests
 
@@ -213,6 +223,12 @@ stardict_output/         # Generated Stardict files
 ├── volubilis_en-th.dict
 └── ... (additional variants)
 
+mobi/                       # Kindle MOBI format directories
+├── volubilis_th-en.mobi     # Thai to English MOBI
+├── volubilis_en-th.mobi     # English to Thai MOBI
+├── volubilis_th-pr-en.mobi  # Thai with pronunciation MOBI
+└── volubilis_th-pr-merge-en.mobi # Pronunciation-merged MOBI
+
 vol_mundo/               # Processed tab-separated output
 ├── d_th-en.txt
 ├── d_en-th.txt
@@ -241,12 +257,14 @@ and English-Thai has a Level to each word, judging how basic it is (B = basic, A
 
 this project converts the Volubilis Thai-English dictionary (released as spread sheat or pdf) to a standart dictionary format.<br><br><br>
 
- Readable through <a href='http://www.huzheng.org/stardict/'>Stardict</a> (win/linux), <a href='https://www.mdict.cn/'>Mdict</a> (android/ios), <a href='http://goldendict.org/'>GoldenDict</a> (win/linux/android), <a href='https://www.google.co.th/url?sa=t&source=web&rct=j&url=https://play.google.com/store/apps/details%3Fid%3Dcom.grandsons.dictboxxth%26hl%3Den%26gl%3DUS%26referrer%3Dutm_source%253Dgoogle%2526utm_medium%253Dorganic%2526utm_term%253Ddict%2Bbox%2Bapp%2Bstore%26pcampaignid%3DAPPU_1_nfq6Y6nnDfOgz7sPt-CzqAU&ved=2ahUKEwjpqcaUvbj8AhVz0HMBHTfwDFUQ8oQBegQIChAB&usg=AOvVaw0SlLHjPWaRVXbk4INevGNt'>Dictbox</a> (android 4-9)<br><br><br><br>
+ Readable through <a href='http://www.huzheng.org/stardict/'>Stardict</a> (win/linux), <a href='https://www.mdict.cn/'>Mdict</a> (android/ios), <a href='http://goldendict.org/'>GoldenDict</a> (win/linux/android), <a href='https://www.google.co.th/url?sa=t&source=web&rct=j&url=https://play.google.com/store/apps/details%3Fid%3Dcom.grandsons.dictboxxth%26hl%3Den%26gl%3DUS%26referrer%3Dutm_source%253Dgoogle%2526utm_medium%253Dorganic%2526utm_term%253Ddict%2Bbox%2Bapp%2Bstore%26pcampaignid%3DAPPU_1_nfq6Y6nnDfOgz7sPt-CzqAU&ved=2ahUKEwjpqcaUvbj8AhVz0HMBHTfwDFUQ8oQBegQIChAB&usg=AOvVaw0SlLHjPWaRVXbk4INevGNt'>Dictbox</a> (android 4-9), Kindle (MOBI/EPUB format)<br><br><br><br>
 
   <b>Install / use:</b>
   to be able to use the dictionary files, you need to download one of the dictionary apps from above and then download the compiled Stardict zip packages from the `stardict/` directory (.ifo/.idx/.dict/.syn/.res.zip for Stardict/GoldenDict, convert to .mdx for Mdict) and after extracting, copy them into the dictionary folder.<br><br>
 
-**GoldenDict NG Users:** Each Stardict zip package includes a `res.zip` with CSS for automatic styling with light/dark themes.<br><br><br><br><br><br><br><br>
+**GoldenDict NG Users:** Each Stardict zip package includes a `res.zip` with CSS for automatic styling with light/dark themes.<br><br>
+
+**Kindle Users:** The `mobi/` folder contains raw MOBI files (OEBPS format) and packaged EPUB files. Use Calibre or an online converter to create proper .mobi files from the .epub files.<br><br><br><br><br><br><br>
 
 
 ## Excel Column Mapping

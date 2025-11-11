@@ -371,7 +371,6 @@ class DictionaryProcessor:
         """Write cached data to output files."""
         th_en_data = data['th_en']
         th_pron_en_data = data['th_pron_en']
-        th_dot_pron_en_data = data['th_dot_pron_en']
         en_th_data = data['en_th']
         th_pron_merge_en_data = defaultdict(list)  # New feature, not in cache
 
