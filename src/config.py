@@ -97,10 +97,12 @@ class DictionaryConfig:
     # Pronunciation file options
     th_pron: bool = True
     th_pron_prefix: str = '.'
-    th_pron_incl_translation_in_entry: bool = True
+    th_pron_incl_translation_in_headword: bool = True
     th_pron_merge: bool = True
     th_pron_merge_prefix: str = ','
-    th_pron_merge_incl_translation_in_entry: bool = True
+    th_pron_merge_incl_translation_in_headword: bool = True
+    th_pron_max_headword_length: int = 40
+    th_pron_merge_max_headword_length: int = 40
 
     # Caching options
     use_cache: bool = True

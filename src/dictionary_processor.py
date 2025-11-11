@@ -274,7 +274,7 @@ class DictionaryProcessor:
         if self.config.th_pron_merge:
             for i, thai_syn in enumerate(thai_synonyms):
                 eng_syn = english_synonyms[i] if i < len(english_synonyms) else ""
-                base_pron = re.sub(r'[-_\\/¯]', '', thai_syn).strip()
+                base_pron = re.sub(r'[-_\\/¯\u0e48-\u0e4c]', '', thai_syn).strip()
                 if base_pron:
                     th_pron_merge_en_data[base_pron].append((thai_syn, eng_syn, level))
 
@@ -282,8 +282,15 @@ class DictionaryProcessor:
         pron_formatted = self.formatter.format_tones(thaiphon.lower(), self.config.paiboon)
         pron_search = self.formatter.format_pronunciation_search(pron_formatted, self.config.paiboon)
 
-        # Create pronunciation entry
-        pron_entry = f"{pron_search} - {thai_word}"
+        # Create pronunciation headword
+        if self.config.th_pron_incl_translation_in_headword:
+            eng_summary = english_word.replace('|', ', ')[:50]
+            pron_headword = f"{pron_search} - {thai_word} ({eng_summary})"
+        else:
+            pron_headword = f"{pron_search} - {thai_word}"
+
+        # Truncate headword if too long
+        pron_headword = pron_headword[:self.config.th_pron_max_headword_length]
 
         # Format definition
         definition = self._format_definition(
@@ -297,8 +304,8 @@ class DictionaryProcessor:
         th_en_data[thai_word].append(sort_prefix + definition)
 
         # Thai with pronunciation to English
-        if pron_entry:
-            th_pron_en_data[pron_entry].append(sort_prefix + definition)
+        if pron_headword:
+            th_pron_en_data[pron_headword].append(sort_prefix + definition)
 
             # English to Thai entries
             self._add_english_to_thai_entries(english_word, definition, type_word, en_th_data)
@@ -495,9 +502,9 @@ class DictionaryProcessor:
                 definitions.sort()
                 key = self.config.th_pron_prefix + pron_word if self.config.th_pron_prefix else pron_word
                 for definition in definitions:
-                    if self.config.th_pron_incl_translation_in_entry:
+                    if self.config.th_pron_incl_translation_in_headword:
                         # Extract English from definition or use full
-                        # For simplicity, use the definition as is, but perhaps modify pron_entry to include eng
+                        # For simplicity, use the definition as is, but perhaps modify pron_headword to include eng
                         # Wait, currently pron_entry is pron - thai, definition is the full def
                         # To include eng, perhaps change pron_entry to pron - thai (eng)
                         # But since eng is in definition, maybe keep as is, or adjust
@@ -515,9 +522,10 @@ class DictionaryProcessor:
                 # Sort items by thai, then level
                 sorted_items = self.formatter.sort_thai_words_by_spelling_and_level(items, self._get_sort_prefix)
                 key = self.config.th_pron_merge_prefix + base_pron if self.config.th_pron_merge_prefix else base_pron
+                key = key[:self.config.th_pron_merge_max_headword_length]
                 thai_list = []
                 for thai, eng, _ in sorted_items:
-                    if self.config.th_pron_merge_incl_translation_in_entry and eng:
+                    if self.config.th_pron_merge_incl_translation_in_headword and eng:
                         thai_list.append(f"{thai} ({eng})")
                     else:
                         thai_list.append(thai)
@@ -541,5 +549,5 @@ class DictionaryProcessor:
                 else:
                     type_entries.append(def_text)
 
-            word_entry = f'<span class="english"><strong>{english_word}</strong></span> <br>' + "<br>".join(type_entries)
-            files['en_th'].write(f"{english_word}\t{word_entry}\n")
+            word_definition = f'<span class="english"><strong>{english_word}</strong></span> <br>' + "<br>".join(type_entries)
+            files['en_th'].write(f"{english_word}\t{word_definition}\n")
