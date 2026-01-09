@@ -15,3 +15,6 @@ Output File Structures:
 • volubilis_th-pr-en.txt: Pronunciation-prefixed headword (.pronunciation - thai) → HTML definition
 • volubilis_en-th.txt: English headword → HTML definition with nested Thai equivalents (Thai word + pronunciation + English definition)
 • volubilis_th-pr-merge-en.txt: Merged pronunciation headword (,pronunciation - thai1, thai2, ...) → merged HTML definitions
+
+MDict Conversion:
+• Use mdict-utils command: mdict -a input.txt output.mdx

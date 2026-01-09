@@ -3,7 +3,6 @@
 import logging
 import shutil
 import subprocess
-import sys
 from pathlib import Path
 from typing import List
 
@@ -34,6 +33,7 @@ class StardictBuilder:
         mobi_dir = self.stardict_dir / "mobi"
         if mobi_dir.exists():
             import shutil
+
             shutil.rmtree(mobi_dir)
         mobi_dir.mkdir(parents=True, exist_ok=True)
 
@@ -55,11 +55,12 @@ class StardictBuilder:
         logger.info(f"Converting {txt_file} to {output_file}")
 
         try:
-            result = subprocess.run([
-                "pyglossary",
-                "--no-sqlite",
-                str(txt_file), str(output_file)
-            ], capture_output=True, text=True, check=True)
+            result = subprocess.run(
+                ["pyglossary", "--no-sqlite", str(txt_file), str(output_file)],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
 
             logger.debug(f"pyglossary output: {result.stdout}")
 
@@ -80,10 +81,12 @@ class StardictBuilder:
         logger.info(f"Converting {txt_file} to {output_file}")
 
         try:
-            result = subprocess.run([
-                "ebook-convert",
-                str(txt_file), str(output_file)
-            ], capture_output=True, text=True, check=True)
+            result = subprocess.run(
+                ["ebook-convert", str(txt_file), str(output_file)],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
 
             logger.debug(f"ebook-convert output: {result.stdout}")
 
@@ -112,19 +115,21 @@ class StardictBuilder:
 
     def _update_ifo_file(self, ifo_file: Path) -> None:
         """Update the .ifo file with version and description."""
-        content = ifo_file.read_text(encoding='utf-8')
-        lines = content.split('\n')
+        content = ifo_file.read_text(encoding="utf-8")
+        lines = content.split("\n")
 
         updated_lines = []
         for line in lines:
-            if line.startswith('version='):
-                updated_lines.append('version=1.0.5')
-            elif line.startswith('description='):
-                updated_lines.append('description=Volubilis Thai-English Dictionary v1.0.5 (data 01.11.2025)')
+            if line.startswith("version="):
+                updated_lines.append("version=1.0.5")
+            elif line.startswith("description="):
+                updated_lines.append(
+                    "description=Volubilis Thai-English Dictionary v1.0.5 (data 01.11.2025)"
+                )
             else:
                 updated_lines.append(line)
 
-        ifo_file.write_text('\n'.join(updated_lines), encoding='utf-8')
+        ifo_file.write_text("\n".join(updated_lines), encoding="utf-8")
 
     def _create_single_zip(self, ifo_file: Path) -> Path:
         """Create a zip package for a single dictionary."""
@@ -140,38 +145,12 @@ class StardictBuilder:
 
         # Add res.zip with styles.css
         res_file = self.unzipped_dir / f"{base_name}.res.zip"
-        import zipfile
-        with zipfile.ZipFile(res_file, 'w', zipfile.ZIP_DEFLATED) as zf:
-            # Add styles.css for HTML formatting
-            css_content = """\
-/* Light theme */
-.thai { font-weight: bold; color: #000080; }
-.pron { color: #008000; font-style: italic; }
-.def { }
-.syn { font-style: italic; color: #800080; }
-.description { }
-.note { color: #808080; font-size: smaller; }
-.level { font-size: smaller; }
-.english { font-weight: bold; color: #800000; }
-.type { font-style: italic; color: #000080; }
-.clf { font-style: italic; }
+        css_file = self.stardict_dir / "styles.css"
+        css_content = css_file.read_text(encoding='utf-8') if css_file.exists() else ""
 
-/* Dark theme */
-@media (prefers-color-scheme: dark) {
-    body { background-color: #121212; color: #ffffff; }
-    .thai { color: #87ceeb; }
-    .pron { color: #90ee90; }
-    .syn { color: #dda0dd; }
-    .description { }
-    .science { font-size: smaller; }
-.science { font-size: smaller; }
-    .note { color: #d3d3d3; }
-    .level { font-size: smaller; }
-    .english { color: #ff6347; }
-    .type { color: #87ceeb; }
-}
-"""
-            zf.writestr('styles.css', css_content)
+        import zipfile
+        with zipfile.ZipFile(res_file, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("styles.css", css_content)
         files_to_zip.append(res_file)
 
         if not files_to_zip:
@@ -181,7 +160,8 @@ class StardictBuilder:
 
         # Create zip file
         import zipfile
-        with zipfile.ZipFile(zip_file, 'w', zipfile.ZIP_DEFLATED) as zf:
+
+        with zipfile.ZipFile(zip_file, "w", zipfile.ZIP_DEFLATED) as zf:
             for file_path in files_to_zip:
                 arcname = file_path.name
                 zf.write(file_path, arcname)

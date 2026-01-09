@@ -5,10 +5,13 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
+from typing import Optional
 
 from src.config import Config
 from src.dictionary_processor import DictionaryProcessor
 from src.stardict_builder import StardictBuilder
+from src.mdict_builder import MdictBuilder
+from src.utils_builder import UtilsBuilder
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -18,6 +21,14 @@ def setup_logging(verbose: bool = False) -> None:
         level=level,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
+
+
+def _load_css_for_mdx(mdict_dir: Path) -> Optional[str]:
+    """Load CSS content for embedding in MDX definitions."""
+    css_file = mdict_dir / "txt" / "styles.css"
+    if css_file.exists():
+        return css_file.read_text(encoding='utf-8')
+    return None
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -119,20 +130,29 @@ def main() -> int:
         # Validate configuration
         config.validate()
 
+        # Setup shared resources
+        stardict_dir = Path("stardict")
+        mdict_dir = Path("mdict")
+        UtilsBuilder.setup_resources(stardict_dir, mdict_dir)
+
         # Create processor and run
         processor = DictionaryProcessor(config)
         processor.process_excel_file()
 
         # Build Stardict packages
-        stardict_dir = Path("stardict")
-        stardict_dir.mkdir(exist_ok=True)
-
         builder = StardictBuilder(args.output_dir, stardict_dir)
         logging.info("Converting to Stardict format...")
         builder.convert_to_stardict()
 
         logging.info("Creating zip packages...")
         zip_files = builder.create_zip_packages()
+
+        # Convert to MDX format with embedded CSS
+        css_content = _load_css_for_mdx(mdict_dir)
+        css_prefix = f"<style>{css_content}</style>" if css_content else None
+        mdx_builder = MdictBuilder(args.output_dir, mdict_dir, css_prefix)
+        logging.info("Converting to MDX format...")
+        mdx_builder.convert_to_mdx()
 
         # Convert to MOBI format if enabled and calibre is available
         if config.dictionary.enable_mobi_build:

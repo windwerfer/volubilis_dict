@@ -7,3 +7,5 @@ __pycache__
 stardict
 mobi
 .env
+.venv/
+mdict/
