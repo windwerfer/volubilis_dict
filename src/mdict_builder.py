@@ -13,7 +13,7 @@ class MdictBuilder:
     """Handles conversion to MDX format for Mdict."""
 
     def __init__(
-        self, txt_dir: Path, mdict_dir: Path, css_prefix: Optional[str] = None
+        self, txt_dir: Path, mdict_dir: Path, css_prefix: Optional[str] = None, config=None
     ):
         self.txt_dir = txt_dir
         self.mdict_dir = mdict_dir
@@ -21,6 +21,7 @@ class MdictBuilder:
         self.css_prefix = (
             css_prefix  # String to prepend to each definition (e.g., CSS styles)
         )
+        self.config = config
 
     def convert_to_mdx(self) -> None:
         """Convert all txt files to MDX format via mdict-utils."""
@@ -60,6 +61,25 @@ class MdictBuilder:
             )
 
             logger.debug(f"mdict output: {result.stdout}")
+
+            # Create MDD file with styles.css if not inline CSS
+            if self.config and not self.config.inline_css:  # type: ignore
+                styles_css = self.mdict_txt_dir / "styles.css"
+                mdd_file = self.mdict_dir / f"{output_name}.mdd"
+                if styles_css.exists():
+                    logger.info(f"Creating MDD file {mdd_file} with styles.css")
+                    try:
+                        result_mdd = subprocess.run(
+                            ["mdict", "-a", str(styles_css), str(mdd_file)],
+                            capture_output=True,
+                            text=True,
+                            check=True,
+                        )
+                        logger.debug(f"MDD creation output: {result_mdd.stdout}")
+                    except subprocess.CalledProcessError as e:
+                        logger.error(f"Failed to create MDD file {mdd_file}: {e}")
+                        logger.error(f"stderr: {e.stderr}")
+                        raise
 
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to convert {txt_file} to MDX: {e}")
