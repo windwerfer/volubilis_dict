@@ -3,7 +3,7 @@
    unofficial dictionary (stardict/mdict/mobi) files for the volubilis project (https://belisan-volubilis.blogspot.com).<br>
    <br>
     most recent version: 01.11.2025 (processed 2025-11-11).<br>
-    software version: 1.1.0<br>
+    software version: 1.2.0<br>
   <br>
 
 
@@ -15,18 +15,24 @@
   - **New**: Pronunciation-based search dictionaries (.pr and .pr-merge variants)<br>
   - **New**: Automatic MOBI file generation for Kindle using Calibre<br>
   - **New**: Environment variable configuration support with .env files<br>
-  - **New**: Comprehensive unit test suite (50+ tests)<br><br><br>
+  - **New**: Comprehensive unit test suite (50+ tests)
+  - **New**: Inline CSS support (--inline-css) for embedded styling
+  - **New**: Compressed Stardict dictionaries (.dict.dz) for reduced file sizes<br><br><br>
 
 ## Installation
 
 ```bash
 pip install -r requirements.txt
-# Optional: for Stardict format conversion
+# Required: for Stardict format conversion
 pip install pyglossary tqdm progressbar2
-# Optional: for MOBI format generation (recommended)
+# Required: for MDict format conversion (mdict command)
+# Install from https://www.mdict.cn/ or use system package
+# Required: for MOBI format generation (recommended)
 # Install Calibre from https://calibre-ebook.com/
-# Optional: for .env file support
+# Required: for .env file support
 pip install python-dotenv
+# Required: for dictzip compression
+pip install idzip
 ```
 
 ## Quick Start
@@ -73,6 +79,8 @@ options:
   --config CONFIG       Path to configuration file (future feature)
   --no-cache            Disable caching of processed data
   --refresh-cache       Force refresh of cache even if valid
+  --inline-css          Inline CSS styles in each dictionary entry
+  --no-dz               Disable .dict.dz compression for Stardict format
 ```
 
 ### Configuration
@@ -98,6 +106,8 @@ Key options include:
 - `columns`: Number of columns to process (default: 32)
 - `paiboon`: Enable Paiboon transcription system (default: True)
 - `debug_test_1000_rows`: Process only first 1000 rows for testing (default: True)
+- `inline_css`: Inline CSS styles in definitions instead of linking (default: False)
+- `no_dz`: Disable dictzip compression for Stardict .dict files (default: False)
 
 #### Pronunciation Dictionaries
 - `th_pron`: Enable/disable pronunciation dictionary generation (default: True)
@@ -194,17 +204,17 @@ The processed dictionary uses standard HTML with CSS classes instead of custom t
 Convert tab-separated output to Stardict format:
 
 ```bash
-# Install pyglossary
-pip install pyglossary
+# Install pyglossary and idzip
+pip install pyglossary idzip
 
-# Convert Thai-English
-pyglossary stardict/txt/volubilis_th-en.txt stardict_output/volubilis_th-en.ifo
+# Convert Thai-English (with compression)
+pyglossary -w "dictzip=true" stardict/txt/volubilis_th-en.txt stardict_output/volubilis_th-en.ifo
 
-# Convert English-Thai
-pyglossary stardict/txt/volubilis_en-th.txt stardict_output/volubilis_en-th.ifo
+# Convert English-Thai (with compression)
+pyglossary -w "dictzip=true" stardict/txt/volubilis_en-th.txt stardict_output/volubilis_en-th.ifo
 ```
 
-The latest Stardict files are available in the `stardict/` directory as individual zip packages.
+The latest Stardict files are available in the `stardict/` directory as individual zip packages with compressed `.dict.dz` files for smaller sizes.
 
 ### MOBI Format for Kindle
 
@@ -276,12 +286,24 @@ stardict/               # Generated Stardict packages
 ├── unzipped/            # Raw Stardict files
 │   ├── volubilis_th-en.ifo
 │   ├── volubilis_th-en.idx
-│   ├── volubilis_th-en.dict
+│   ├── volubilis_th-en.dict.dz  # Compressed dictionary data
 │   └── volubilis_th-en.res.zip  # CSS resources per dictionary
 ├── volubilis_th-en.zip      # Thai to English package
 ├── volubilis_en-th.zip      # English to Thai package
 ├── volubilis_th-pr-en.zip   # Thai with pronunciation package
 └── volubilis_th-pr-merge-en.zip # Pronunciation-merged Thai package
+
+mdict/                        # Generated MDict packages
+├── txt/                      # Intermediate files
+│   ├── volubilis_en-th.txt   # English to Thai (tab-separated)
+│   ├── volubilis_th-en.txt   # Thai to English (tab-separated)
+│   ├── volubilis_th-pr-en.txt # Thai pronunciation to English (tab-separated)
+│   └── volubilis_th-pr-merge-en.txt # Pronunciation-merged Thai to English (tab-separated)
+├── volubilis_th-en.mdx       # Thai to English MDX
+├── volubilis_th-en.mdd       # Thai to English MDD (CSS resources)
+├── volubilis_en-th.mdx       # English to Thai MDX
+├── volubilis_en-th.mdd       # English to Thai MDD (CSS resources)
+└── ... (additional variants)
 
 mobi/                         # Kindle MOBI format files
 ├── volubilis_th-en.mobi       # Thai to English MOBI (ready for Kindle)
@@ -311,9 +333,7 @@ src/
 ├── dictionary_processor.py  # Main Excel processing logic
 ├── main.py              # CLI interface
 ├── vol_mundo_01.11.2025.xlsx  # Source Excel file
-├── readme.txt           # Legacy documentation
-├── convert_tabTxt_to_mdxTxt.py  # Legacy MDX conversion
-└── main__excel_extract_columns_to_txt-v10.py  # Legacy processing script
+└── readme.txt           # Legacy documentation
 
 res/
 └── styles.css           # CSS styling for GoldenDict NG
@@ -350,10 +370,11 @@ and English-Thai has a Level to each word, judging how basic it is (B = basic, A
 
 this project converts the Volubilis Thai-English dictionary (released as spread sheat or pdf) to a standart dictionary format.<br><br><br>
 
- Readable through <a href='http://www.huzheng.org/stardict/'>Stardict</a> (win/linux), <a href='https://www.mdict.cn/'>Mdict</a> (android/ios), <a href='http://goldendict.org/'>GoldenDict</a> (win/linux/android), <a href='https://www.google.co.th/url?sa=t&source=web&rct=j&url=https://play.google.com/store/apps/details%3Fid%3Dcom.grandsons.dictboxxth%26hl%3Den%26gl%3DUS%26referrer%3Dutm_source%253Dgoogle%2526utm_medium%253Dorganic%2526utm_term%253Ddict%2Bbox%2Bapp%2Bstore%26pcampaignid%3DAPPU_1_nfq6Y6nnDfOgz7sPt-CzqAU&ved=2ahUKEwjpqcaUvbj8AhVz0HMBHTfwDFUQ8oQBegQIChAB&usg=AOvVaw0SlLHjPWaRVXbk4INevGNt'>Dictbox</a> (android 4-9), Kindle (MOBI/EPUB format)<br><br><br><br>
+  Readable through <a href='http://www.huzheng.org/stardict/'>Stardict</a> (win/linux), <a href='https://www.mdict.cn/'>Mdict</a> (android/ios), <a href='http://goldendict.org/'>GoldenDict</a> (win/linux/android), <a href='https://www.google.co.th/url?sa=t&source=web&rct=j&url=https://play.google.com/store/apps/details%3Fid%3Dcom.grandsons.dictboxxth%26hl%3Den%26gl%3DUS%26referrer%3Dutm_source%253Dgoogle%2526utm_medium%253Dorganic%2526utm_term%253Ddict%2Bbox%2Bapp%2Bstore%26pcampaignid%3DAPPU_1_nfq6Y6nnDfOgz7sPt-CzqAU&ved=2ahUKEwjpqcaUvbj8AhVz0HMBHTfwDFUQ8oQBegQIChAB&usg=AOvVaw0SlLHjPWaRVXbk4INevGNt'>Dictbox</a> (android 4-9), Kindle (MOBI/EPUB format)<br><br>
+  Output formats: Stardict (.ifo/.idx/.dict.dz/.syn/.res.zip), MDict (.mdx/.mdd), MOBI for Kindle<br><br><br>
 
   <b>Install / use:</b>
-  to be able to use the dictionary files, you need to download one of the dictionary apps from above and then download the compiled Stardict zip packages from the `stardict/` directory (.ifo/.idx/.dict/.syn/.res.zip for Stardict/GoldenDict, convert to .mdx for Mdict) and after extracting, copy them into the dictionary folder.<br><br>
+   to be able to use the dictionary files, you need to download one of the dictionary apps from above and then download the compiled Stardict zip packages from the `stardict/` directory (.ifo/.idx/.dict.dz/.syn/.res.zip for Stardict/GoldenDict, .mdx/.mdd for Mdict) and after extracting, copy them into the dictionary folder.<br><br>
 
 **GoldenDict NG Users:** Each Stardict zip package includes a `res.zip` with CSS for automatic styling with light/dark themes.<br><br>
 
@@ -427,19 +448,20 @@ The codebase has been completely rewritten with modern Python practices:
 7. **HTML Conversion**: Transforms custom tags to standard HTML with CSS classes for modern dictionary apps
 8. **GoldenDict NG Support**: Includes CSS themes with light/dark mode for enhanced readability
 9. **Automated Pipeline**: Single command creates complete Stardict packages with proper directory structure
-10. **Stardict Builder**: Integrated conversion and packaging system for professional distribution
-11. **Pronunciation Dictionaries**: Generates pronunciation-based search variants (.pr and .pr-merge)
-12. **Tone-Aware Sorting**: Pronunciation merge groups words by sound with proper tone ordering
-13. **MOBI Support**: Automatic Kindle .mobi file generation using Calibre
-14. **Environment Configuration**: Flexible configuration via .env files and environment variables
-15. **Comprehensive Testing**: Extensive unit test suite with 50+ tests covering all major components
-16. **Modern Python**: Type hints, dataclasses, and clean architecture throughout
+ 10. **Stardict Builder**: Integrated conversion and packaging system for professional distribution
+ 11. **Pronunciation Dictionaries**: Generates pronunciation-based search variants (.pr and .pr-merge)
+ 12. **Tone-Aware Sorting**: Pronunciation merge groups words by sound with proper tone ordering
+ 13. **MOBI Support**: Automatic Kindle .mobi file generation using Calibre
+ 14. **MDict Support**: Automatic .mdx/.mdd file generation for MDict readers
+ 15. **Inline CSS Option**: Embed CSS directly in definitions for self-contained dictionaries
+ 16. **Dictzip Compression**: Compress Stardict .dict files to .dict.dz for smaller packages
+ 17. **Environment Configuration**: Flexible configuration via .env files and environment variables
+ 18. **Comprehensive Testing**: Extensive unit test suite with 50+ tests covering all major components
+ 19. **Modern Python**: Type hints, dataclasses, and clean architecture throughout
 
 ### Legacy Code
 
-The original scripts are preserved in `src/` for reference:
-- `convert_tabTxt_to_mdxTxt.py`: MDX conversion utility
-- `main__excel_extract_columns_to_txt-v10.py`: Original Excel processing script
+The original scripts have been removed. Legacy documentation is preserved in `src/readme.txt` for reference.
 
 The new codebase provides the same functionality with better maintainability and extensibility.
 
