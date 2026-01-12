@@ -4,6 +4,15 @@
 // see: https://zed.dev/docs/debugger
 [
   {
+    "label": "Python: Module (volubilis_dict)",
+    "adapter": "Debugpy",
+    "request": "launch",
+    "module": "main",
+    "args": ["src/vol_mundo_01.11.2025.xlsx"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "console": "integratedTerminal",
+  },
+  {
     "adapter": "Debugpy",
     "label": "run module 'volubilis_dict/main.py src/vol_mundo_01.11.2025.xlsx'",
     "request": "launch",
