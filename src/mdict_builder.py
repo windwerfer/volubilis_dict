@@ -24,7 +24,6 @@ class MdictBuilder:
 
     def convert_to_mdx(self) -> None:
         """Convert all txt files to MDX format via mdict-utils."""
-        self.mdict_txt_dir.mkdir(parents=True, exist_ok=True)
 
         # Copy res.zip to mdict/txt for resources
         res_zip = Path("res.zip")

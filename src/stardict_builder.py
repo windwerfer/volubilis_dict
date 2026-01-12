@@ -20,7 +20,6 @@ class StardictBuilder:
 
     def convert_to_stardict(self) -> None:
         """Convert all txt files to Stardict format."""
-        self.unzipped_dir.mkdir(parents=True, exist_ok=True)
 
         txt_files = list(self.txt_dir.glob("volubilis_*.txt"))
         if not txt_files:

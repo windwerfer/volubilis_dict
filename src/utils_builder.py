@@ -14,7 +14,10 @@ class UtilsBuilder:
         """Setup common directories and static files like CSS."""
         # Create directories
         stardict_dir.mkdir(exist_ok=True)
+        (stardict_dir / "txt").mkdir(exist_ok=True)
+        (stardict_dir / "unzipped").mkdir(exist_ok=True)
         mdict_dir.mkdir(exist_ok=True)
+        (mdict_dir / "txt").mkdir(exist_ok=True)
 
         # Write CSS to both locations
         css_content = config.dictionary.css_content
