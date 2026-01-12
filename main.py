@@ -89,6 +89,12 @@ Examples:
         help="Force refresh of cache even if valid",
     )
 
+    parser.add_argument(
+        "--inline-css",
+        action="store_true",
+        help="Inline CSS styles in each dictionary entry",
+    )
+
     return parser
 
 
@@ -112,6 +118,7 @@ def main() -> int:
         config.dictionary.debug_test_1000_rows = args.debug_1000
         config.dictionary.use_cache = not args.no_cache
         config.dictionary.force_refresh_cache = args.refresh_cache
+        config.dictionary.inline_css = args.inline_css
 
         # Validate configuration
         config.validate()
@@ -121,12 +128,15 @@ def main() -> int:
         mdict_dir = Path("mdict")
         UtilsBuilder.setup_resources(stardict_dir, mdict_dir)
 
+        # Load CSS content
+        config.dictionary.css_content = _load_css_for_mdx(Path("mdict"))
+
         # Create processor and run
-        processor = DictionaryProcessor(config)
+        processor = DictionaryProcessor(config, config.dictionary.css_content)
         processor.process_excel_file()
 
         # Build Stardict packages
-        builder = StardictBuilder(args.output_dir, stardict_dir)
+        builder = StardictBuilder(args.output_dir, stardict_dir, css_content=config.dictionary.css_content)
         logging.info("Converting to Stardict format...")
         builder.convert_to_stardict()
 
@@ -134,8 +144,7 @@ def main() -> int:
         zip_files = builder.create_zip_packages()
 
         # Convert to MDX format with embedded CSS
-        css_content = _load_css_for_mdx(mdict_dir)
-        css_prefix = f"<style>{css_content}</style>" if css_content else None
+        css_prefix = f"<style>{config.dictionary.css_content}</style>" if config.dictionary.css_content and not config.dictionary.inline_css else None
         mdx_builder = MdictBuilder(args.output_dir, mdict_dir, css_prefix)
         logging.info("Converting to MDX format...")
         mdx_builder.convert_to_mdx()

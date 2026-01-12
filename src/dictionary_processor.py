@@ -5,6 +5,7 @@ import logging
 import pickle
 import re
 from collections import defaultdict
+from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Tuple, cast
 
 from .config import Config
@@ -28,10 +29,11 @@ logger = logging.getLogger(__name__)
 class DictionaryProcessor:
     """Processes Excel dictionary files into various output formats."""
 
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, css_content: Optional[str] = None):
         self.config = config.dictionary
         self.formatter = TextFormatter(self.config.patterns)
         self.file_handler = FileHandler()
+        self.css_content = css_content
 
         # Ensure cache file is in output directory
         if not self.config.cache_file.is_absolute():
@@ -154,6 +156,29 @@ class DictionaryProcessor:
             # Close all files
             for f in output_files.values():
                 f.close()
+
+        # Process Stardict txt to MDict txt
+        mdict_txt_dir = Path("mdict") / "txt"
+        mdict_txt_dir.mkdir(parents=True, exist_ok=True)
+
+        file_names = [
+            "volubilis_th-en.txt",
+            "volubilis_th-pr-en.txt",
+            "volubilis_en-th.txt",
+        ]
+        if self.config.th_pron_merge:
+            file_names.append("volubilis_th-pr-merge-en.txt")
+
+        for file_name in file_names:
+            stardict_file = self.config.output_folder / file_name
+            mdict_file = mdict_txt_dir / file_name
+            if stardict_file.exists():
+                with open(stardict_file, "r", encoding="utf-8") as f:
+                    content = f.read()
+                processed_content = self.formatter.process_content_to_mdx(content, None)
+                with open(mdict_file, "w", encoding="utf-8") as f:
+                    f.write(processed_content)
+                logger.info(f"Processed {stardict_file} to {mdict_file}")
 
         # Save to cache if enabled
         if self.config.use_cache:
@@ -301,6 +326,29 @@ class DictionaryProcessor:
             for f in output_files.values():
                 f.close()
 
+        # Process Stardict txt to MDict txt
+        mdict_txt_dir = Path("mdict") / "txt"
+        mdict_txt_dir.mkdir(parents=True, exist_ok=True)
+
+        file_names = [
+            "volubilis_th-en.txt",
+            "volubilis_th-pr-en.txt",
+            "volubilis_en-th.txt",
+        ]
+        if self.config.th_pron_merge:
+            file_names.append("volubilis_th-pr-merge-en.txt")
+
+        for file_name in file_names:
+            stardict_file = self.config.output_folder / file_name
+            mdict_file = mdict_txt_dir / file_name
+            if stardict_file.exists():
+                with open(stardict_file, "r", encoding="utf-8") as f:
+                    content = f.read()
+                processed_content = self.formatter.process_content_to_mdx(content, None)
+                with open(mdict_file, "w", encoding="utf-8") as f:
+                    f.write(processed_content)
+                logger.info(f"Processed {stardict_file} to {mdict_file}")
+
         # Save to cache
         if self.config.use_cache:
             cache_data = {
@@ -418,6 +466,11 @@ class DictionaryProcessor:
             english_word,
             dom,
         )
+
+        # Add inline CSS if enabled
+        if self.config.inline_css and self.css_content:
+            css_str = f"<style>{self.css_content}</style>"
+            definition = css_str + definition
 
         # Collect for pron merge
         if self.config.th_pron_merge:

@@ -119,6 +119,10 @@ class DictionaryConfig:
     cache_file: Path = Path("cache.pkl")
     force_refresh_cache: bool = False
 
+    # CSS options
+    inline_css: bool = False
+    css_content: Optional[str] = None
+
     # Dictionary metadata
     title_en_th: str = "volubilis v2 (en-th)"
     title_th_en: str = "volubilis v2 (th-en)"

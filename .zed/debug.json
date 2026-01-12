@@ -1,0 +1,15 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+  {
+    "adapter": "Debugpy",
+    "label": "run module 'volubilis_dict/main.py src/vol_mundo_01.11.2025.xlsx'",
+    "request": "launch",
+    "python": "$ZED_CUSTOM_PYTHON_ACTIVE_ZED_TOOLCHAIN",
+    "args": ["src/vol_mundo_01.11.2025.xlsx"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "module": "$ZED_CUSTOM_PYTHON_MODULE_NAME",
+  },
+]

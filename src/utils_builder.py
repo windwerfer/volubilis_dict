@@ -44,11 +44,13 @@ class UtilsBuilder:
     .type { color: #87ceeb; }
 }
 """
-        css_file_stardict = stardict_dir / "styles.css"
+        css_file_stardict = stardict_dir / "txt" / "styles.css"
         css_file_mdict_txt = mdict_dir / "txt" / "styles.css"
 
-        css_file_stardict.write_text(css_content, encoding='utf-8')
-        css_file_mdict_txt.parent.mkdir(parents=True, exist_ok=True)  # Ensure txt dir exists
-        css_file_mdict_txt.write_text(css_content, encoding='utf-8')
+        css_file_stardict.write_text(css_content, encoding="utf-8")
+        css_file_mdict_txt.parent.mkdir(
+            parents=True, exist_ok=True
+        )  # Ensure txt dir exists
+        css_file_mdict_txt.write_text(css_content, encoding="utf-8")
 
         logger.info(f"CSS written to {css_file_stardict} and {css_file_mdict_txt}")

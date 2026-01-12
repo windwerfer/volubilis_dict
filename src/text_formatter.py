@@ -1,7 +1,7 @@
 """Text formatting utilities for dictionary processing."""
 
 import re
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 from .config import RegexPatterns
 
@@ -102,3 +102,46 @@ class TextFormatter:
     def sort_thai_words_by_tone_and_level(self, items: List[Tuple[str, str, str, str]], get_sort_prefix) -> List[Tuple[str, str, str, str]]:
         """Sort list of (thai_word, eng, level) by tone priority then level prefix."""
         return sorted(items, key=lambda x: (self.get_tone_priority(x[0]), get_sort_prefix(x[2])))
+
+    def process_content_to_mdx(self, content: str, css_prefix: Optional[str] = None) -> str:
+        """Process the entire content to MDX format."""
+        lines = content.splitlines()
+        processed_lines = []
+
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+
+            tmp = line.split("\t")
+            # Ignore invalid entries
+            if len(tmp) != 2 or not tmp[0] or not tmp[1]:
+                continue
+
+            # Handle synonyms
+            syn = [s.strip() for s in tmp[0].split("|") if s.strip()]
+            if not syn:
+                continue  # Skip if no valid headwords
+            tmp[0] = syn[0]
+            # Add @@@LINK entries for additional synonyms
+            for synonym in syn[1:]:
+                if synonym:  # Ensure synonym is not empty
+                    synonym = synonym.replace("\n", " ")  # Remove any \n in synonym
+                    processed_lines.append(f"{synonym}\n@@@LINK={tmp[0]}\n</>\n")
+
+            # Remove escaped newlines and add optional prefix (e.g., CSS)
+            tmp[1] = re.sub(r"\\n", "", tmp[1])
+            if css_prefix:
+                tmp[1] = css_prefix + tmp[1]
+
+            # Ensure headword has no \n and is not empty
+            headword = tmp[0].replace("\n", " ").strip()
+            if not headword:
+                continue
+
+            # Ensure definition ends cleanly, then add newline before </>
+            definition = tmp[1].rstrip("\n")
+            # Format as headword\n definition\n</>\n
+            processed_lines.append(f"{headword}\n{definition}\n</>\n")
+
+        return "".join(processed_lines)

@@ -1,8 +1,6 @@
 """Tests for dictionary processing logic."""
 
-import pytest
-from unittest.mock import patch, MagicMock
-from pathlib import Path
+from unittest.mock import patch
 
 from src.dictionary_processor import DictionaryProcessor
 
@@ -47,16 +45,16 @@ class TestDictionaryProcessor:
 
         # Test nested defaultdict conversion
         nested_dd = defaultdict(lambda: defaultdict(list))
-        nested_dd['key1']['subkey1'].append('value1')
-        nested_dd['key1']['subkey2'].append('value2')
+        nested_dd["key1"]["subkey1"].append("value1")
+        nested_dd["key1"]["subkey2"].append("value2")
 
         result = processor._convert_defaultdict_to_dict(nested_dd)
 
         assert isinstance(result, dict)
-        assert 'key1' in result
-        assert isinstance(result['key1'], dict)
-        assert result['key1']['subkey1'] == ['value1']
-        assert result['key1']['subkey2'] == ['value2']
+        assert "key1" in result
+        assert isinstance(result["key1"], dict)
+        assert result["key1"]["subkey1"] == ["value1"]
+        assert result["key1"]["subkey2"] == ["value2"]
 
     def test_get_sort_prefix(self, mock_config):
         """Test sort prefix generation."""
@@ -84,7 +82,7 @@ class TestDictionaryProcessor:
         result = processor._format_level_info("", "")
         assert result == ""
 
-    @patch('src.dictionary_processor.OPENPYXL_AVAILABLE', False)
+    @patch("src.dictionary_processor.OPENPYXL_AVAILABLE", False)
     def test_process_excel_mock_data(self, mock_config, temp_dir):
         """Test processing with mock data when openpyxl unavailable."""
         mock_config.dictionary.output_folder = temp_dir / "output"
@@ -100,7 +98,7 @@ class TestDictionaryProcessor:
         th_en_file = temp_dir / "output" / "volubilis_th-en.txt"
         assert th_en_file.exists()
 
-        content = th_en_file.read_text(encoding='utf-8')
+        content = th_en_file.read_text(encoding="utf-8")
         assert "สวัสดี" in content
         assert "sawadee" in content
 
@@ -115,10 +113,10 @@ class TestDictionaryProcessor:
 
         files = processor._open_output_files()
 
-        expected_files = ['th_en', 'th_pron_en', 'en_th', 'th_pron_merge_en']
+        expected_files = ["th_en", "th_pron_en", "en_th", "th_pron_merge_en"]
         for key in expected_files:
             assert key in files
-            assert hasattr(files[key], 'write')
+            assert hasattr(files[key], "write")
 
         # Close files
         for f in files.values():
@@ -127,17 +125,36 @@ class TestDictionaryProcessor:
     def test_process_row_valid_data(self, mock_config):
         """Test processing a valid data row."""
         from collections import defaultdict
+
         processor = DictionaryProcessor(mock_config)
 
         # Sample row data (matching column mapping)
-        row = ("", "", "sà-wàt-dii", "สวัสดี", "sawadee", "", "", "greeting", "common", "", "", "", "", "A1", "")
+        row = (
+            "",
+            "",
+            "sà-wàt-dii",
+            "สวัสดี",
+            "sawadee",
+            "",
+            "",
+            "greeting",
+            "common",
+            "",
+            "",
+            "",
+            "",
+            "A1",
+            "",
+        )
 
         th_en_data = defaultdict(list)
         th_pron_en_data = defaultdict(list)
         th_pron_merge_en_data = defaultdict(list)
         en_th_data = defaultdict(lambda: defaultdict(list))
 
-        result = processor._process_row(row, th_en_data, th_pron_en_data, th_pron_merge_en_data, en_th_data)
+        result = processor._process_row(
+            row, th_en_data, th_pron_en_data, th_pron_merge_en_data, en_th_data
+        )
 
         assert result is True
         assert "สวัสดี" in th_en_data
@@ -146,6 +163,7 @@ class TestDictionaryProcessor:
     def test_process_row_invalid_data(self, mock_config):
         """Test processing invalid data rows."""
         from collections import defaultdict
+
         processor = DictionaryProcessor(mock_config)
 
         # Row with missing required data
@@ -155,7 +173,9 @@ class TestDictionaryProcessor:
         th_pron_merge_en_data = defaultdict(list)
         en_th_data = defaultdict(lambda: defaultdict(list))
 
-        result = processor._process_row(row, th_en_data, th_pron_en_data, th_pron_merge_en_data, en_th_data)
+        result = processor._process_row(
+            row, th_en_data, th_pron_en_data, th_pron_merge_en_data, en_th_data
+        )
 
         assert result is False
         assert len(th_en_data) == 0
@@ -175,7 +195,7 @@ class TestDictionaryProcessor:
             note="",
             level="A1",
             english="cat",
-            dom="animal"
+            dom="animal",
         )
 
         assert "แมว" in result
@@ -188,6 +208,7 @@ class TestDictionaryProcessor:
     def test_add_english_to_thai_entries(self, mock_config):
         """Test adding English to Thai entries."""
         from collections import defaultdict
+
         processor = DictionaryProcessor(mock_config)
 
         en_th_data = defaultdict(lambda: defaultdict(list))

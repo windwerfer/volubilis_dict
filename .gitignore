@@ -4,8 +4,9 @@ vol_mundo/
 src/__pycache__
 venv
 __pycache__
-stardict
+
 mobi
 .env
 .venv/
-mdict/
+mdict*/
+stardict*/

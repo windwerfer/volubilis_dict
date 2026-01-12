@@ -4,7 +4,7 @@ import logging
 import shutil
 import subprocess
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -12,10 +12,11 @@ logger = logging.getLogger(__name__)
 class StardictBuilder:
     """Handles conversion to Stardict format and packaging."""
 
-    def __init__(self, txt_dir: Path, stardict_dir: Path):
+    def __init__(self, txt_dir: Path, stardict_dir: Path, css_content: Optional[str] = None):
         self.txt_dir = txt_dir
         self.stardict_dir = stardict_dir
         self.unzipped_dir = stardict_dir / "unzipped"
+        self.css_content = css_content
 
     def convert_to_stardict(self) -> None:
         """Convert all txt files to Stardict format."""
@@ -145,8 +146,7 @@ class StardictBuilder:
 
         # Add res.zip with styles.css
         res_file = self.unzipped_dir / f"{base_name}.res.zip"
-        css_file = self.stardict_dir / "styles.css"
-        css_content = css_file.read_text(encoding='utf-8') if css_file.exists() else ""
+        css_content = self.css_content or ""
 
         import zipfile
         with zipfile.ZipFile(res_file, "w", zipfile.ZIP_DEFLATED) as zf:
