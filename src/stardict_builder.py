@@ -165,8 +165,8 @@ class StardictBuilder:
 
         # Find all related files
         files_to_zip = []
-        dict_ext = ".dict" if self.config.no_dz else ".dict.dz"  # type: ignore
-        for ext in [".ifo", ".idx", dict_ext]:
+        dict_ext = ".dict" if self.config.no_dz else ".dict.dz"
+        for ext in [".ifo", ".idx", ".syn", dict_ext]:
             f = ifo_file.with_suffix(ext)
             if f.exists():
                 files_to_zip.append(f)
