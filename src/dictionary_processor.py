@@ -29,11 +29,12 @@ logger = logging.getLogger(__name__)
 class DictionaryProcessor:
     """Processes Excel dictionary files into various output formats."""
 
-    def __init__(self, config: Config, css_content: Optional[str] = None):
+    def __init__(self, config: Config, css_content: Optional[str] = None, mobi_txt_dir: Optional[Path] = None):
         self.config = config.dictionary
         self.formatter = TextFormatter(self.config.patterns)
         self.file_handler = FileHandler()
         self.css_content = css_content
+        self.mobi_txt_dir = mobi_txt_dir
 
         # Ensure cache file is in output directory
         if not self.config.cache_file.is_absolute():
@@ -375,6 +376,22 @@ class DictionaryProcessor:
             files["th_pron_merge_en"] = open(
                 base_path / "volubilis_th-pr-merge-en.txt", "w", encoding="utf-8"
             )
+
+        # Open MOBI files if mobi_txt_dir is set
+        if self.mobi_txt_dir:
+            mobi_files = {
+                "mobi_th_en": open(self.mobi_txt_dir / "volubilis_th-en.txt", "w", encoding="utf-8"),
+                "mobi_th_pron_en": open(
+                    self.mobi_txt_dir / "volubilis_th-pr-en.txt", "w", encoding="utf-8"
+                ),
+                "mobi_en_th": open(self.mobi_txt_dir / "volubilis_en-th.txt", "w", encoding="utf-8"),
+            }
+            if self.config.th_pron_merge:
+                mobi_files["mobi_th_pron_merge_en"] = open(
+                    self.mobi_txt_dir / "volubilis_th-pr-merge-en.txt", "w", encoding="utf-8"
+                )
+            files.update(mobi_files)
+
         return files
 
     def _process_row(
@@ -687,11 +704,19 @@ class DictionaryProcessor:
             css_tag = f"<style>{css_content_clean}</style>"
         else:
             css_tag = '<link rel="stylesheet" type="text/css" href="styles.css" />'
+
+        # MOBI always uses inline CSS
+        mobi_css_tag = '<link rel="stylesheet" type="text/css" href="styles.css" />'
+        if self.css_content:
+            mobi_css_content_clean = self.css_content.replace('\n', ' ')
+            mobi_css_tag = f"<style>{mobi_css_content_clean}</style>"
         # Thai to English
         for thai_word, definitions in th_en_data.items():
             definitions.sort()
             for definition in definitions:
                 files["th_en"].write(f"{thai_word}\t{css_tag}{definition[2:]}\n")
+                if "mobi_th_en" in files:
+                    files["mobi_th_en"].write(f"{thai_word}\t{mobi_css_tag}{definition[2:]}\n")
 
         # Thai pronunciation to English
         if self.config.th_pron:
@@ -703,19 +728,23 @@ class DictionaryProcessor:
                     else pron_word
                 )
                 for definition in definitions:
-                    if self.config.th_pron_incl_translation_in_headword:
-                        # Extract English from definition or use full
-                        # For simplicity, use the definition as is, but perhaps modify pron_headword to include eng
-                        # Wait, currently pron_entry is pron - thai, definition is the full def
-                        # To include eng, perhaps change pron_entry to pron - thai (eng)
-                        # But since eng is in definition, maybe keep as is, or adjust
-                        # For now, since definition includes eng, just write as is
-                        files["th_pron_en"].write(f"{key}\t{css_tag}{definition[2:]}\n")
-                    else:
-                        # Remove eng from definition? But complicated.
-                        # For now, assume if not incl, just thai
-                        # But to keep simple, always include for now
-                        files["th_pron_en"].write(f"{key}\t{css_tag}{definition[2:]}\n")
+                     if self.config.th_pron_incl_translation_in_headword:
+                         # Extract English from definition or use full
+                         # For simplicity, use the definition as is, but perhaps modify pron_headword to include eng
+                         # Wait, currently pron_entry is pron - thai, definition is the full def
+                         # To include eng, perhaps change pron_entry to pron - thai (eng)
+                         # But since eng is in definition, maybe keep as is, or adjust
+                         # For now, since definition includes eng, just write as is
+                         files["th_pron_en"].write(f"{key}\t{css_tag}{definition[2:]}\n")
+                         if "mobi_th_pron_en" in files:
+                             files["mobi_th_pron_en"].write(f"{key}\t{mobi_css_tag}{definition[2:]}\n")
+                     else:
+                         # Remove eng from definition? But complicated.
+                         # For now, assume if not incl, just thai
+                         # But to keep simple, always include for now
+                         files["th_pron_en"].write(f"{key}\t{css_tag}{definition[2:]}\n")
+                         if "mobi_th_pron_en" in files:
+                             files["mobi_th_pron_en"].write(f"{key}\t{mobi_css_tag}{definition[2:]}\n")
 
         # Thai pronunciation merge to English
         if self.config.th_pron_merge and "th_pron_merge_en" in files:
@@ -745,6 +774,8 @@ class DictionaryProcessor:
                 definitions = [item[3] for item in sorted_items if item[3]]
                 value = "<br><br>".join(definitions) if definitions else ""
                 files["th_pron_merge_en"].write(f"{key}\t{css_tag}{value}\n")
+                if "mobi_th_pron_merge_en" in files:
+                    files["mobi_th_pron_merge_en"].write(f"{key}\t{mobi_css_tag}{value}\n")
 
         # English to Thai
         for english_word, type_groups in en_th_data.items():
@@ -769,3 +800,10 @@ class DictionaryProcessor:
                 + "<br>".join(type_entries)
             )
             files["en_th"].write(f"{english_word}\t{word_definition}\n")
+            if "mobi_en_th" in files:
+                mobi_word_definition = (
+                    mobi_css_tag
+                    + f'<span class="english"><strong>{english_word}</strong></span> <br>'
+                    + "<br>".join(type_entries)
+                )
+                files["mobi_en_th"].write(f"{english_word}\t{mobi_word_definition}\n")

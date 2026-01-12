@@ -37,21 +37,7 @@ class StardictBuilder:
         for txt_file in txt_files:
             self._convert_single_file(txt_file)
 
-    def convert_to_mobi(self) -> None:
-        """Convert all txt files to MOBI format for Kindle."""
-        mobi_dir = self.stardict_dir / "mobi"
-        if mobi_dir.exists():
-            import shutil
 
-            shutil.rmtree(mobi_dir)
-        mobi_dir.mkdir(parents=True, exist_ok=True)
-
-        txt_files = list(self.txt_dir.glob("volubilis_*.txt"))
-        if not txt_files:
-            raise FileNotFoundError(f"No txt files found in {self.txt_dir}")
-
-        for txt_file in txt_files:
-            self._convert_single_file_to_mobi(txt_file, mobi_dir)
 
     def _convert_single_file(self, txt_file: Path) -> None:
         """Convert a single txt file to Stardict format."""
@@ -99,28 +85,7 @@ class StardictBuilder:
             logger.error(f"stderr: {e.stderr}")
             raise
 
-    def _convert_single_file_to_mobi(self, txt_file: Path, mobi_dir: Path) -> None:
-        """Convert a single txt file to MOBI format."""
-        # Use the txt file stem as the output name
-        output_name = txt_file.stem
-        output_file = mobi_dir / f"{output_name}.mobi"
 
-        logger.info(f"Converting {txt_file} to {output_file}")
-
-        try:
-            result = subprocess.run(
-                ["ebook-convert", str(txt_file), str(output_file)],
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-
-            logger.debug(f"ebook-convert output: {result.stdout}")
-
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to convert {txt_file} to MOBI: {e}")
-            logger.error(f"stderr: {e.stderr}")
-            raise
 
     def create_zip_packages(self) -> List[Path]:
         """Create individual zip packages for each dictionary."""

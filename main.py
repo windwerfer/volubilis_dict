@@ -9,6 +9,7 @@ from typing import Optional
 from src.config import Config
 from src.dictionary_processor import DictionaryProcessor
 from src.mdict_builder import MdictBuilder
+from src.mobi_builder import MobiBuilder
 from src.stardict_builder import StardictBuilder
 from src.utils_builder import UtilsBuilder
 
@@ -133,7 +134,8 @@ def main() -> int:
         # Setup shared resources
         stardict_dir = Path("stardict")
         mdict_dir = Path("mdict")
-        UtilsBuilder.setup_resources(stardict_dir, mdict_dir, config)
+        mobi_dir = Path("mobi")
+        UtilsBuilder.setup_resources(stardict_dir, mdict_dir, mobi_dir, config)
 
         # Create processor and run
         processor = DictionaryProcessor(config, config.dictionary.css_content)
@@ -160,7 +162,9 @@ def main() -> int:
 
             if shutil.which("ebook-convert"):
                 logging.info("Converting to MOBI format...")
-                builder.convert_to_mobi()
+                mobi_dir = Path("stardict/mobi")
+                mobi_builder = MobiBuilder(args.output_dir, mobi_dir, config.dictionary.css_content, config=config.dictionary)
+                mobi_builder.convert_to_mobi()
             else:
                 logging.warning("Calibre not found - skipping MOBI conversion")
 

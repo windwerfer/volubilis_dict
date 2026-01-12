@@ -10,7 +10,9 @@ class UtilsBuilder:
     """Handles shared setup tasks like directories and static files."""
 
     @staticmethod
-    def setup_resources(stardict_dir: Path, mdict_dir: Path, config) -> None:
+    def setup_resources(
+        stardict_dir: Path, mdict_dir: Path, mobi_dir: Path, config
+    ) -> None:
         """Setup common directories and static files like CSS."""
         # Create directories
         stardict_dir.mkdir(exist_ok=True)
@@ -18,6 +20,8 @@ class UtilsBuilder:
         (stardict_dir / "unzipped").mkdir(exist_ok=True)
         mdict_dir.mkdir(exist_ok=True)
         (mdict_dir / "txt").mkdir(exist_ok=True)
+        mobi_dir.mkdir(exist_ok=True)
+        (mobi_dir / "txt").mkdir(exist_ok=True)
 
         # Write CSS to both locations
         css_content = config.dictionary.css_content
