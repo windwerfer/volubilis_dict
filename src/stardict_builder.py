@@ -14,7 +14,13 @@ logger = logging.getLogger(__name__)
 class StardictBuilder:
     """Handles conversion to Stardict format and packaging."""
 
-    def __init__(self, txt_dir: Path, stardict_dir: Path, css_content: Optional[str] = None, config: Optional[DictionaryConfig] = None):
+    def __init__(
+        self,
+        txt_dir: Path,
+        stardict_dir: Path,
+        css_content: Optional[str] = None,
+        config: Optional[DictionaryConfig] = None,
+    ):
         self.txt_dir = txt_dir
         self.stardict_dir = stardict_dir
         self.unzipped_dir = stardict_dir / "unzipped"
@@ -58,10 +64,10 @@ class StardictBuilder:
         logger.info(f"Converting {txt_file} to {output_file}")
 
         try:
-            cmd = ["pyglossary"]
+            cmd = ["pyglossary", "--no-sqlite"]
             if not self.config.no_dz:  # type: ignore
-                cmd.append("--dictzip")
-            cmd.extend(["--no-sqlite", str(txt_file), str(output_file)])
+                cmd.extend(["-w", "dictzip=true"])
+            cmd.extend([str(txt_file), str(output_file)])
             result = subprocess.run(
                 cmd,
                 capture_output=True,
@@ -70,6 +76,20 @@ class StardictBuilder:
             )
 
             logger.debug(f"pyglossary output: {result.stdout}")
+
+            # Compress .dict to .dict.dz if enabled
+            if not self.config.no_dz:  # type: ignore
+                dict_file = output_file.with_suffix(".dict")
+                dz_file = output_file.with_suffix(".dict.dz")
+                if dict_file.exists():
+                    import idzip
+
+                    # Use idzip for proper dictzip format
+                    with open(dict_file, "rb") as src:
+                        with idzip.open(str(dz_file), "wb", sync_size=65536) as dz:
+                            dz.write(src.read())
+                    dict_file.unlink()  # Remove uncompressed .dict
+                    logger.debug(f"Compressed {dict_file} to {dz_file} using idzip")
 
             # Update the .ifo file with version and description
             self._update_ifo_file(output_file)
@@ -156,6 +176,7 @@ class StardictBuilder:
         css_content = self.css_content or ""
 
         import zipfile
+
         with zipfile.ZipFile(res_file, "w", zipfile.ZIP_DEFLATED) as zf:
             zf.writestr("styles.css", css_content)
         files_to_zip.append(res_file)

@@ -151,18 +151,31 @@ class DictionaryConfig:
     # CSS options
     inline_css: bool = False
     css_content: str = """
-/* Default CSS for dictionary styling */
-.thai { font-weight: bold; }
-.pron { color: #666; font-style: italic; }
-.type { color: #888; font-size: 0.9em; }
-.def { margin-top: 0.5em; }
-.syn { color: #555; font-size: 0.9em; }
-.science { color: #007; font-weight: bold; }
-.level { color: #777; font-size: 0.8em; }
-.note { color: #933; font-style: italic; }
-.classifier { color: #060; }
-.english { font-weight: bold; }
-.word_type { color: #666; font-style: italic; }
+    /* Light theme */
+    .thai { font-weight: bold; color: #000080; }
+    .pron { color: #008000; font-style: italic; }
+    .def { }
+    .syn { font-style: italic; color: #800080; }
+    .description { }
+    .note { color: #808080; font-size: smaller; }
+    .level { font-size: smaller; }
+    .english { font-weight: bold; color: #800000; }
+    .type { font-style: italic; color: #000080; }
+    .clf { font-style: italic; }
+
+    /* Dark theme */
+    @media (prefers-color-scheme: dark) {
+    body { background-color: #121212; color: #ffffff; }
+    .thai { color: #87ceeb; }
+    .pron { color: #90ee90; }
+    .syn { color: #dda0dd; }
+    .description { }
+    .science { font-size: smaller; }
+    .note { color: #d3d3d3; }
+    .level { font-size: smaller; }
+    .english { color: #ff6347; }
+    .type { color: #87ceeb; }
+    }
 """
 
     # Compression options

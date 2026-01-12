@@ -6,3 +6,4 @@ pyglossary
 tqdm
 progressbar2
 mdict-utils
+python-idzip
