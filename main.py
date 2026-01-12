@@ -95,6 +95,12 @@ Examples:
         help="Inline CSS styles in each dictionary entry",
     )
 
+    parser.add_argument(
+        "--no-dz",
+        action="store_true",
+        help="Disable .dict.dz compression for Stardict format",
+    )
+
     return parser
 
 
@@ -119,6 +125,7 @@ def main() -> int:
         config.dictionary.use_cache = not args.no_cache
         config.dictionary.force_refresh_cache = args.refresh_cache
         config.dictionary.inline_css = args.inline_css
+        config.dictionary.no_dz = args.no_dz
 
         # Validate configuration
         config.validate()
@@ -134,7 +141,7 @@ def main() -> int:
 
         # Build Stardict packages
         builder = StardictBuilder(
-            args.output_dir, stardict_dir, css_content=config.dictionary.css_content
+            args.output_dir, stardict_dir, css_content=config.dictionary.css_content, config=config.dictionary
         )
         logging.info("Converting to Stardict format...")
         builder.convert_to_stardict()

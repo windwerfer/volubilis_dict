@@ -585,14 +585,7 @@ class DictionaryProcessor:
         dom: str = "",
     ) -> str:
         """Format a complete definition string with standard HTML and CSS classes."""
-        # Add CSS reference
-        if self.config.inline_css and self.css_content:
-            # Remove newlines for Stardict txt compatibility
-            css_content_clean = self.css_content.replace('\n', ' ')
-            css_tag = f"<style>{css_content_clean}</style>"
-        else:
-            css_tag = '<link rel="stylesheet" type="text/css" href="styles.css" />'
-        definition = css_tag
+        definition = ""
 
         # Add pronunciation
         if pron_formatted:
@@ -687,11 +680,18 @@ class DictionaryProcessor:
         self, files, th_en_data, th_pron_en_data, th_pron_merge_en_data, en_th_data
     ):
         """Write all processed data to output files."""
+        # Determine CSS tag
+        if self.config.inline_css and self.css_content:
+            # Remove newlines for Stardict txt compatibility
+            css_content_clean = self.css_content.replace('\n', ' ')
+            css_tag = f"<style>{css_content_clean}</style>"
+        else:
+            css_tag = '<link rel="stylesheet" type="text/css" href="styles.css" />'
         # Thai to English
         for thai_word, definitions in th_en_data.items():
             definitions.sort()
             for definition in definitions:
-                files["th_en"].write(f"{thai_word}\t{definition[2:]}\n")
+                files["th_en"].write(f"{thai_word}\t{css_tag}{definition[2:]}\n")
 
         # Thai pronunciation to English
         if self.config.th_pron:
@@ -710,12 +710,12 @@ class DictionaryProcessor:
                         # To include eng, perhaps change pron_entry to pron - thai (eng)
                         # But since eng is in definition, maybe keep as is, or adjust
                         # For now, since definition includes eng, just write as is
-                        files["th_pron_en"].write(f"{key}\t{definition[2:]}\n")
+                        files["th_pron_en"].write(f"{key}\t{css_tag}{definition[2:]}\n")
                     else:
                         # Remove eng from definition? But complicated.
                         # For now, assume if not incl, just thai
                         # But to keep simple, always include for now
-                        files["th_pron_en"].write(f"{key}\t{definition[2:]}\n")
+                        files["th_pron_en"].write(f"{key}\t{css_tag}{definition[2:]}\n")
 
         # Thai pronunciation merge to English
         if self.config.th_pron_merge and "th_pron_merge_en" in files:
@@ -744,7 +744,7 @@ class DictionaryProcessor:
                 # Merge all definitions with <br><br> separator
                 definitions = [item[3] for item in sorted_items if item[3]]
                 value = "<br><br>".join(definitions) if definitions else ""
-                files["th_pron_merge_en"].write(f"{key}\t{value}\n")
+                files["th_pron_merge_en"].write(f"{key}\t{css_tag}{value}\n")
 
         # English to Thai
         for english_word, type_groups in en_th_data.items():
@@ -764,7 +764,8 @@ class DictionaryProcessor:
                     type_entries.append(def_text)
 
             word_definition = (
-                f'<span class="english"><strong>{english_word}</strong></span> <br>'
+                css_tag
+                + f'<span class="english"><strong>{english_word}</strong></span> <br>'
                 + "<br>".join(type_entries)
             )
             files["en_th"].write(f"{english_word}\t{word_definition}\n")

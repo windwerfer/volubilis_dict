@@ -4,7 +4,9 @@ import logging
 import shutil
 import subprocess
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, cast
+
+from .config import DictionaryConfig
 
 logger = logging.getLogger(__name__)
 
@@ -12,11 +14,12 @@ logger = logging.getLogger(__name__)
 class StardictBuilder:
     """Handles conversion to Stardict format and packaging."""
 
-    def __init__(self, txt_dir: Path, stardict_dir: Path, css_content: Optional[str] = None):
+    def __init__(self, txt_dir: Path, stardict_dir: Path, css_content: Optional[str] = None, config: Optional[DictionaryConfig] = None):
         self.txt_dir = txt_dir
         self.stardict_dir = stardict_dir
         self.unzipped_dir = stardict_dir / "unzipped"
         self.css_content = css_content
+        self.config = cast(DictionaryConfig, config)
 
     def convert_to_stardict(self) -> None:
         """Convert all txt files to Stardict format."""
@@ -55,8 +58,12 @@ class StardictBuilder:
         logger.info(f"Converting {txt_file} to {output_file}")
 
         try:
+            cmd = ["pyglossary"]
+            if not self.config.no_dz:  # type: ignore
+                cmd.append("--dictzip")
+            cmd.extend(["--no-sqlite", str(txt_file), str(output_file)])
             result = subprocess.run(
-                ["pyglossary", "--no-sqlite", str(txt_file), str(output_file)],
+                cmd,
                 capture_output=True,
                 text=True,
                 check=True,
@@ -138,7 +145,8 @@ class StardictBuilder:
 
         # Find all related files
         files_to_zip = []
-        for ext in [".ifo", ".idx", ".dict"]:
+        dict_ext = ".dict" if self.config.no_dz else ".dict.dz"  # type: ignore
+        for ext in [".ifo", ".idx", dict_ext]:
             f = ifo_file.with_suffix(ext)
             if f.exists():
                 files_to_zip.append(f)
