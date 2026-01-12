@@ -465,14 +465,9 @@ class DictionaryProcessor:
             level,
             english_word,
             dom,
-        )
+         )
 
-        # Add inline CSS if enabled
-        if self.config.inline_css and self.css_content:
-            css_str = f"<style>{self.css_content}</style>"
-            definition = css_str + definition
-
-        # Collect for pron merge
+         # Collect for pron merge
         if self.config.th_pron_merge:
             for i, thai_syn in enumerate(thai_synonyms):
                 eng_syn = english_synonyms[i] if i < len(english_synonyms) else ""
@@ -590,7 +585,14 @@ class DictionaryProcessor:
         dom: str = "",
     ) -> str:
         """Format a complete definition string with standard HTML and CSS classes."""
-        definition = f'<span class="thai"><strong>{thai}</strong></span> '
+        # Add CSS reference
+        if self.config.inline_css and self.css_content:
+            # Remove newlines for Stardict txt compatibility
+            css_content_clean = self.css_content.replace('\n', ' ')
+            css_tag = f"<style>{css_content_clean}</style>"
+        else:
+            css_tag = '<link rel="stylesheet" type="text/css" href="styles.css" />'
+        definition = css_tag
 
         # Add pronunciation
         if pron_formatted:

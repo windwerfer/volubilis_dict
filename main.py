@@ -142,13 +142,8 @@ def main() -> int:
         logging.info("Creating zip packages...")
         zip_files = builder.create_zip_packages()
 
-        # Convert to MDX format with embedded CSS
-        css_prefix = (
-            f"<style>{config.dictionary.css_content}</style>"
-            if config.dictionary.css_content and not config.dictionary.inline_css
-            else None
-        )
-        mdx_builder = MdictBuilder(args.output_dir, mdict_dir, css_prefix)
+        # Convert to MDX format (CSS handled in definitions)
+        mdx_builder = MdictBuilder(args.output_dir, mdict_dir, None)
         logging.info("Converting to MDX format...")
         mdx_builder.convert_to_mdx()
 
