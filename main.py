@@ -126,17 +126,16 @@ def main() -> int:
         # Setup shared resources
         stardict_dir = Path("stardict")
         mdict_dir = Path("mdict")
-        UtilsBuilder.setup_resources(stardict_dir, mdict_dir)
-
-        # Load CSS content
-        config.dictionary.css_content = _load_css_for_mdx(Path("mdict"))
+        UtilsBuilder.setup_resources(stardict_dir, mdict_dir, config)
 
         # Create processor and run
         processor = DictionaryProcessor(config, config.dictionary.css_content)
         processor.process_excel_file()
 
         # Build Stardict packages
-        builder = StardictBuilder(args.output_dir, stardict_dir, css_content=config.dictionary.css_content)
+        builder = StardictBuilder(
+            args.output_dir, stardict_dir, css_content=config.dictionary.css_content
+        )
         logging.info("Converting to Stardict format...")
         builder.convert_to_stardict()
 
@@ -144,7 +143,11 @@ def main() -> int:
         zip_files = builder.create_zip_packages()
 
         # Convert to MDX format with embedded CSS
-        css_prefix = f"<style>{config.dictionary.css_content}</style>" if config.dictionary.css_content and not config.dictionary.inline_css else None
+        css_prefix = (
+            f"<style>{config.dictionary.css_content}</style>"
+            if config.dictionary.css_content and not config.dictionary.inline_css
+            else None
+        )
         mdx_builder = MdictBuilder(args.output_dir, mdict_dir, css_prefix)
         logging.info("Converting to MDX format...")
         mdx_builder.convert_to_mdx()
