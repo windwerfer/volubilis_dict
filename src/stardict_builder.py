@@ -171,15 +171,16 @@ class StardictBuilder:
             if f.exists():
                 files_to_zip.append(f)
 
-        # Add res.zip with styles.css
-        res_file = self.unzipped_dir / f"{base_name}.res.zip"
-        css_content = self.css_content or ""
+        # Add res.zip with styles.css (only if not inline CSS)
+        if not self.config.inline_css:  # type: ignore
+            res_file = self.unzipped_dir / f"{base_name}.res.zip"
+            css_content = self.css_content or ""
 
-        import zipfile
+            import zipfile
 
-        with zipfile.ZipFile(res_file, "w", zipfile.ZIP_DEFLATED) as zf:
-            zf.writestr("styles.css", css_content)
-        files_to_zip.append(res_file)
+            with zipfile.ZipFile(res_file, "w", zipfile.ZIP_DEFLATED) as zf:
+                zf.writestr("styles.css", css_content)
+            files_to_zip.append(res_file)
 
         if not files_to_zip:
             raise FileNotFoundError(f"No files found for {base_name}")
