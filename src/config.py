@@ -142,6 +142,7 @@ class DictionaryConfig:
 
     # MOBI build options (requires calibre to be installed)
     enable_mobi_build: bool = False
+    create_mobi: bool = False
 
     # Caching options
     use_cache: bool = True

@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +12,7 @@ class UtilsBuilder:
 
     @staticmethod
     def setup_resources(
-        stardict_dir: Path, mdict_dir: Path, mobi_dir: Path, config
+        stardict_dir: Path, mdict_dir: Path, config, mobi_dir: Optional[Path] = None
     ) -> None:
         """Setup common directories and static files like CSS."""
         # Create directories
@@ -20,8 +21,9 @@ class UtilsBuilder:
         (stardict_dir / "unzipped").mkdir(exist_ok=True)
         mdict_dir.mkdir(exist_ok=True)
         (mdict_dir / "txt").mkdir(exist_ok=True)
-        mobi_dir.mkdir(exist_ok=True)
-        (mobi_dir / "txt").mkdir(exist_ok=True)
+        if config.dictionary.create_mobi and mobi_dir:
+            mobi_dir.mkdir(exist_ok=True)
+            (mobi_dir / "txt").mkdir(exist_ok=True)
 
         # Write CSS to both locations
         css_content = config.dictionary.css_content

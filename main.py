@@ -102,6 +102,12 @@ Examples:
         help="Disable .dict.dz compression for Stardict format",
     )
 
+    parser.add_argument(
+        "--create-mobi",
+        action="store_true",
+        help="Create MOBI format files for Kindle",
+    )
+
     return parser
 
 
@@ -127,6 +133,7 @@ def main() -> int:
         config.dictionary.force_refresh_cache = args.refresh_cache
         config.dictionary.inline_css = args.inline_css
         config.dictionary.no_dz = args.no_dz
+        config.dictionary.create_mobi = args.create_mobi
 
         # Validate configuration
         config.validate()
@@ -134,11 +141,15 @@ def main() -> int:
         # Setup shared resources
         stardict_dir = Path("stardict")
         mdict_dir = Path("mdict")
-        mobi_dir = Path("mobi")
-        UtilsBuilder.setup_resources(stardict_dir, mdict_dir, mobi_dir, config)
-
-        # Create processor and run
-        processor = DictionaryProcessor(config, config.dictionary.css_content)
+        mobi_txt_dir = None
+        if args.create_mobi:
+            mobi_dir = Path("mobi")
+            UtilsBuilder.setup_resources(stardict_dir, mdict_dir, config, mobi_dir)
+            mobi_txt_dir = Path("mobi/txt")
+            processor = DictionaryProcessor(config, config.dictionary.css_content, mobi_txt_dir)
+        else:
+            UtilsBuilder.setup_resources(stardict_dir, mdict_dir, config)
+            processor = DictionaryProcessor(config, config.dictionary.css_content)
         processor.process_excel_file()
 
         # Build Stardict packages
@@ -156,14 +167,14 @@ def main() -> int:
         logging.info("Converting to MDX format...")
         mdx_builder.convert_to_mdx()
 
-        # Convert to MOBI format if enabled and calibre is available
-        if config.dictionary.enable_mobi_build:
+        # Convert to MOBI format if requested and calibre is available
+        if args.create_mobi and mobi_txt_dir:
             import shutil
 
             if shutil.which("ebook-convert"):
                 logging.info("Converting to MOBI format...")
-                mobi_dir = Path("stardict/mobi")
-                mobi_builder = MobiBuilder(args.output_dir, mobi_dir, config.dictionary.css_content, config=config.dictionary)
+                mobi_dir = Path("mobi")
+                mobi_builder = MobiBuilder(mobi_txt_dir, mobi_dir, config.dictionary.css_content, config=config.dictionary)
                 mobi_builder.convert_to_mobi()
             else:
                 logging.warning("Calibre not found - skipping MOBI conversion")

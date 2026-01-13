@@ -122,7 +122,7 @@ Key options include:
 #### MOBI Build Options
 - `enable_mobi_build`: Enable/disable MOBI file generation for Kindle (default: True)
   - **Requires**: Calibre (`ebook-convert` command) must be installed
-  - **Output**: Creates `.mobi` files in `stardict/mobi/` directory
+   - **Output**: Creates `.mobi` files in `mobi/` directory
 
 ### Python API
 
@@ -229,7 +229,7 @@ MOBI files for Kindle are automatically generated when `enable_mobi_build = True
 # MOBI files are created automatically during build
 python main.py src/vol_mundo_01.11.2025.xlsx
 
-# Files will be available in stardict/mobi/:
+# Files will be available in mobi/:
 # - volubilis_th-en.mobi
 # - volubilis_en-th.mobi
 # - volubilis_th-pr-en.mobi
@@ -306,6 +306,11 @@ mdict/                        # Generated MDict packages
 └── ... (additional variants)
 
 mobi/                         # Kindle MOBI format files
+├── txt/                      # Intermediate files with inline CSS
+│   ├── volubilis_en-th.txt   # English to Thai (tab-separated with inline CSS)
+│   ├── volubilis_th-en.txt   # Thai to English (tab-separated with inline CSS)
+│   ├── volubilis_th-pr-en.txt # Thai pronunciation to English (tab-separated with inline CSS)
+│   └── volubilis_th-pr-merge-en.txt # Pronunciation-merged Thai to English (tab-separated with inline CSS)
 ├── volubilis_th-en.mobi       # Thai to English MOBI (ready for Kindle)
 ├── volubilis_en-th.mobi       # English to Thai MOBI (ready for Kindle)
 ├── volubilis_th-pr-en.mobi    # Thai with pronunciation MOBI (ready for Kindle)
@@ -378,7 +383,7 @@ this project converts the Volubilis Thai-English dictionary (released as spread 
 
 **GoldenDict NG Users:** Each Stardict zip package includes a `res.zip` with CSS for automatic styling with light/dark themes.<br><br>
 
-**Kindle Users:** The `stardict/mobi/` folder contains ready-to-use `.mobi` files created with Calibre. These can be directly transferred to your Kindle device or used with Kindle apps.<br><br><br><br><br><br><br>
+**Kindle Users:** The `mobi/` folder contains ready-to-use `.mobi` files created with Calibre. These can be directly transferred to your Kindle device or used with Kindle apps.<br><br><br><br><br><br><br>
 
 
 ## Excel Column Mapping
