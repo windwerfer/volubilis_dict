@@ -28,9 +28,10 @@ class MobiBuilder:
 
     def convert_to_mobi(self) -> None:
         """Convert all txt files to MOBI format for Kindle."""
-        if self.mobi_dir.exists():
-            shutil.rmtree(self.mobi_dir)
         self.mobi_dir.mkdir(parents=True, exist_ok=True)
+        # Remove any existing .mobi files to avoid conflicts
+        for mobi_file in self.mobi_dir.glob("*.mobi"):
+            mobi_file.unlink()
 
         txt_files = list(self.mobi_txt_dir.glob("volubilis_*.txt"))
         if not txt_files:
