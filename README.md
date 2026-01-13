@@ -14,37 +14,28 @@
   - **New**: HTML-formatted definitions with CSS styling for GoldenDict NG<br>
   - **New**: Pronunciation-based search dictionaries (.pr and .pr-merge variants)<br>
   - **New**: Automatic MOBI file generation for Kindle using Calibre<br>
-  - **New**: Environment variable configuration support with .env files<br>
-  - **New**: Comprehensive unit test suite (50+ tests)
   - **New**: Inline CSS support (--inline-css) for embedded styling
   - **New**: Compressed Stardict dictionaries (.dict.dz) for reduced file sizes<br><br><br>
+
+
+
+
+**GoldenDict NG Setup:**
+1. Download and install [GoldenDict NG](https://github.com/xiaoyifang/goldendict-ng)
+2. Extract the stardict dictionary files ( https://github.com/windwerfer/volubilis_dict/releases ) into a folder and add that folder in goldendict (edit->dictionaries->sources->files->add..)
+4. Supports light/dark mode switching
+
+
+
+
+
 
 ## Installation
 
 ```bash
+git clone https://github.com/windwerfer/volubilis_dict.git
+cd volubilis_dict
 pip install -r requirements.txt
-# Required: for Stardict format conversion
-pip install pyglossary tqdm progressbar2
-# Required: for MDict format conversion (mdict command)
-# Install from https://www.mdict.cn/ or use system package
-# Required: for MOBI format generation (recommended)
-# Install Calibre from https://calibre-ebook.com/
-# Required: for .env file support
-pip install python-dotenv
-# Required: for dictzip compression
-pip install idzip
-```
-
-## Quick Start
-
-```bash
-# Process Excel file and create Stardict packages
-python main.py src/vol_mundo_01.11.2025.xlsx
-
-# The stardict/ directory will contain:
-# - Individual zip packages for each dictionary variant
-# - CSS resources for GoldenDict NG
-# - Intermediate files organized in subdirectories
 ```
 
 ## Usage
@@ -53,13 +44,19 @@ python main.py src/vol_mundo_01.11.2025.xlsx
 
 Create complete Stardict packages from Excel file:
 ```bash
+# Create Stardict and MDict packages
 python main.py src/vol_mundo_01.11.2025.xlsx
+
+# Create Stardict, MDict, and MOBI packages
+python main.py src/vol_mundo_01.11.2025.xlsx --create-mobi
 ```
 
-This single command will:
+The command will:
 1. Process the Excel file to tab-separated text files
 2. Convert to Stardict format (.ifo/.idx/.dict files)
 3. Package each dictionary with CSS resources into individual zip files
+4. Convert to MDict format (.mdx/.mdd)
+5. Optionally convert to MOBI format for Kindle (with --create-mobi)
 
 ### Command Line Options
 
@@ -79,24 +76,15 @@ options:
   --config CONFIG       Path to configuration file (future feature)
   --no-cache            Disable caching of processed data
   --refresh-cache       Force refresh of cache even if valid
-  --inline-css          Inline CSS styles in each dictionary entry
-  --no-dz               Disable .dict.dz compression for Stardict format
+   --inline-css          Inline CSS styles in each dictionary entry
+   --no-dz               Disable .dict.dz compression for Stardict format
+   --create-mobi         Create MOBI format files for Kindle
 ```
 
 ### Configuration
 
 The dictionary generation can be customized via environment variables or `src/config.py`. A `.env` file is provided with all default values.
 
-#### Using Environment Variables
-
-1. Copy `.env` to your working directory
-2. Modify values as needed
-3. The application will automatically load these variables
-
-```bash
-# Example: Change output directory
-VOLUBILIS_OUTPUT_FOLDER=my_output python main.py src/vol_mundo_01.11.2025.xlsx
-```
 
 #### Configuration Options
 
@@ -120,9 +108,10 @@ Key options include:
 - `th_pron_merge_max_headword_length`: Maximum length for merge headwords (default: 50)
 
 #### MOBI Build Options
-- `enable_mobi_build`: Enable/disable MOBI file generation for Kindle (default: True)
+- `enable_mobi_build`: Legacy option for MOBI file generation (deprecated, use --create-mobi)
+- `create_mobi`: Enable/disable MOBI file generation for Kindle (default: False)
   - **Requires**: Calibre (`ebook-convert` command) must be installed
-   - **Output**: Creates `.mobi` files in `mobi/` directory
+  - **Output**: Creates `.mobi` files in `mobi/` directory
 
 ### Python API
 
@@ -193,12 +182,6 @@ The processed dictionary uses standard HTML with CSS classes instead of custom t
 - `<span class="note">` for notes
 - `<span class="science">` for scientific classifications
 
-**GoldenDict NG Setup:**
-1. Download and install [GoldenDict NG](https://github.com/xiaoyifang/goldendict-ng)
-2. Extract the `res.zip` file to your GoldenDict NG data directory
-3. The CSS will be automatically loaded from the `res/` folder
-4. Supports light/dark mode switching
-
 ### Stardict Format
 
 Convert tab-separated output to Stardict format:
@@ -218,7 +201,7 @@ The latest Stardict files are available in the `stardict/` directory as individu
 
 ### MOBI Format for Kindle
 
-MOBI files for Kindle are automatically generated when `enable_mobi_build = True` in the configuration.
+MOBI files for Kindle are generated when `--create-mobi` is used or `create_mobi = True` in the configuration.
 
 **Requirements:**
 - Install [Calibre](https://calibre-ebook.com/) (provides the `ebook-convert` command)
@@ -226,8 +209,8 @@ MOBI files for Kindle are automatically generated when `enable_mobi_build = True
 
 **Usage:**
 ```bash
-# MOBI files are created automatically during build
-python main.py src/vol_mundo_01.11.2025.xlsx
+# MOBI files are created when --create-mobi is specified
+python main.py src/vol_mundo_01.11.2025.xlsx --create-mobi
 
 # Files will be available in mobi/:
 # - volubilis_th-en.mobi
@@ -258,110 +241,6 @@ pytest -v
 
 ### Project Structure
 
-```
-main.py                 # Root-level CLI entry point
-.env                    # Environment variable configuration template
-res.zip                 # CSS resources for GoldenDict NG
-requirements.txt        # Python dependencies
-setup.py               # Package setup
-pytest.ini            # Test configuration
-src/
-├── __init__.py          # Package initialization
-├── config.py            # Configuration management
-├── exceptions.py        # Custom exceptions
-├── file_handler.py      # File I/O utilities
-├── text_formatter.py    # Text processing and regex transformations
-├── dictionary_processor.py  # Main Excel processing logic
-├── stardict_builder.py  # Stardict conversion and packaging
-└── main.py              # Legacy CLI (deprecated)
-
-stardict/               # Generated Stardict packages
-├── txt/                 # Intermediate files
-│   ├── css.zip          # CSS resources (copied from root)
-│   ├── cache.pkl        # Processing cache
-│   ├── volubilis_en-th.txt      # English to Thai (tab-separated)
-│   ├── volubilis_th-en.txt      # Thai to English (tab-separated)
-│   ├── volubilis_th-pr-en.txt   # Thai pronunciation to English (tab-separated)
-│   └── volubilis_th-pr-merge-en.txt # Pronunciation-merged Thai to English (tab-separated)
-├── unzipped/            # Raw Stardict files
-│   ├── volubilis_th-en.ifo
-│   ├── volubilis_th-en.idx
-│   ├── volubilis_th-en.dict.dz  # Compressed dictionary data
-│   └── volubilis_th-en.res.zip  # CSS resources per dictionary
-├── volubilis_th-en.zip      # Thai to English package
-├── volubilis_en-th.zip      # English to Thai package
-├── volubilis_th-pr-en.zip   # Thai with pronunciation package
-└── volubilis_th-pr-merge-en.zip # Pronunciation-merged Thai package
-
-mdict/                        # Generated MDict packages
-├── txt/                      # Intermediate files
-│   ├── volubilis_en-th.txt   # English to Thai (tab-separated)
-│   ├── volubilis_th-en.txt   # Thai to English (tab-separated)
-│   ├── volubilis_th-pr-en.txt # Thai pronunciation to English (tab-separated)
-│   └── volubilis_th-pr-merge-en.txt # Pronunciation-merged Thai to English (tab-separated)
-├── volubilis_th-en.mdx       # Thai to English MDX
-├── volubilis_th-en.mdd       # Thai to English MDD (CSS resources)
-├── volubilis_en-th.mdx       # English to Thai MDX
-├── volubilis_en-th.mdd       # English to Thai MDD (CSS resources)
-└── ... (additional variants)
-
-mobi/                         # Kindle MOBI format files
-├── txt/                      # Intermediate files with inline CSS
-│   ├── volubilis_en-th.txt   # English to Thai (tab-separated with inline CSS)
-│   ├── volubilis_th-en.txt   # Thai to English (tab-separated with inline CSS)
-│   ├── volubilis_th-pr-en.txt # Thai pronunciation to English (tab-separated with inline CSS)
-│   └── volubilis_th-pr-merge-en.txt # Pronunciation-merged Thai to English (tab-separated with inline CSS)
-├── volubilis_th-en.mobi       # Thai to English MOBI (ready for Kindle)
-├── volubilis_en-th.mobi       # English to Thai MOBI (ready for Kindle)
-├── volubilis_th-pr-en.mobi    # Thai with pronunciation MOBI (ready for Kindle)
-└── volubilis_th-pr-merge-en.mobi # Pronunciation-merged MOBI (ready for Kindle)
-
- tests/
- ├── conftest.py          # Shared test fixtures
- ├── test_config.py       # Configuration tests
- ├── test_dictionary_processor.py  # Core processing tests
- ├── test_stardict_builder.py     # Stardict building tests
- ├── test_file_handler.py         # File I/O tests
- ├── test_main.py         # CLI interface tests
- └── test_text_formatter.py       # Text processing tests
-
- requirements.txt         # Python dependencies
- setup.py                # Package setup
- pytest.ini             # Test configuration
-```
-src/
-├── __init__.py          # Package initialization
-├── config.py            # Configuration management
-├── exceptions.py        # Custom exceptions
-├── file_handler.py      # File I/O utilities
-├── text_formatter.py    # Text processing and regex transformations
-├── dictionary_processor.py  # Main Excel processing logic
-├── main.py              # CLI interface
-├── vol_mundo_01.11.2025.xlsx  # Source Excel file
-└── readme.txt           # Legacy documentation
-
-res/
-└── styles.css           # CSS styling for GoldenDict NG
-
-stardict_output/         # Generated Stardict files
-├── volubilis_th-en.ifo
-├── volubilis_th-en.idx
-├── volubilis_th-en.dict
-├── volubilis_en-th.ifo
-├── volubilis_en-th.idx
-├── volubilis_en-th.dict
-└── ... (additional variants)
-
-
-
-tests/
-└── test_text_formatter.py  # Unit tests
-
-requirements.txt         # Python dependencies
-setup.py                # Package setup
-pytest.ini             # Test configuration
-res.zip                 # CSS resources for GoldenDict NG
-volubilis_stardict_2025-11-11.zip  # Latest Stardict package
 ```
 
 <img  style='width:90%;max-width:1445px;'  src='https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_thai_lookup.png'><br>
