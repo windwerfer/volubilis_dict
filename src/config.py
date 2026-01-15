@@ -152,6 +152,7 @@ class DictionaryConfig:
     # CSS options
     inline_css: bool = False
     css_content: str = """
+
     /* Light theme */
     .thai { font-weight: bold; color: #000080; }
     .pron { color: #008000; font-style: italic; }
@@ -178,6 +179,21 @@ class DictionaryConfig:
     .type { color: #87ceeb; }
     }
 """
+
+    # MOBI style mapping for inline styles
+    style_mapping: Dict[str, str] = field(
+        default_factory=lambda: {
+            'class="thai"': 'style="font-weight: bold; color: #000080;"',
+            'class="pron"': 'style="color: #008000; font-style: italic;"',
+            'class="def"': 'style=""',
+            'class="syn"': 'style="font-style: italic; color: #800080;"',
+            'class="note"': 'style="color: #808080; font-size: smaller;"',
+            'class="level"': 'style="font-size: smaller;"',
+            'class="english"': 'style="font-weight: bold; color: #800000;"',
+            'class="type"': 'style="font-style: italic; color: #000080;"',
+            'class="clf"': 'style="font-style: italic;"',
+        }
+    )
 
     # Compression options
     no_dz: bool = False

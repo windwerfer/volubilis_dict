@@ -37,8 +37,25 @@ class MobiBuilder:
         if not txt_files:
             raise FileNotFoundError(f"No txt files found in {self.mobi_txt_dir}")
 
+        # Inline styles in txt files before conversion
+        self._inline_styles()
+
         for txt_file in txt_files:
             self._convert_single_file_to_mobi(txt_file)
+
+    def _inline_styles(self) -> None:
+        """Inline CSS styles in MOBI txt files by replacing classes with style attributes."""
+        import re
+
+        txt_files = list(self.mobi_txt_dir.glob("volubilis_*.txt"))
+        for txt_file in txt_files:
+            content = txt_file.read_text(encoding="utf-8")
+            # Remove any <style> blocks (though MOBI txt shouldn't have them now)
+            content = re.sub(r'<style[^>]*>.*?</style>', '', content, flags=re.DOTALL)
+            # Apply style replacements
+            for class_attr, style_attr in self.config.style_mapping.items():
+                content = content.replace(class_attr, style_attr)
+            txt_file.write_text(content, encoding="utf-8")
 
     def _convert_single_file_to_mobi(self, txt_file: Path) -> None:
         """Convert a single txt file to MOBI format."""

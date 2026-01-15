@@ -705,18 +705,14 @@ class DictionaryProcessor:
         else:
             css_tag = '<link rel="stylesheet" type="text/css" href="styles.css" />'
 
-        # MOBI always uses inline CSS
-        mobi_css_tag = '<link rel="stylesheet" type="text/css" href="styles.css" />'
-        if self.css_content:
-            mobi_css_content_clean = self.css_content.replace('\n', ' ')
-            mobi_css_tag = f"<style>{mobi_css_content_clean}</style>"
+
         # Thai to English
         for thai_word, definitions in th_en_data.items():
             definitions.sort()
             for definition in definitions:
                 files["th_en"].write(f"{thai_word}\t{css_tag}{definition[2:]}\n")
                 if "mobi_th_en" in files:
-                    files["mobi_th_en"].write(f"{thai_word}\t{mobi_css_tag}{definition[2:]}\n")
+                    files["mobi_th_en"].write(f"{thai_word}\t{definition[2:]}\n")
 
         # Thai pronunciation to English
         if self.config.th_pron:
@@ -737,14 +733,14 @@ class DictionaryProcessor:
                          # For now, since definition includes eng, just write as is
                          files["th_pron_en"].write(f"{key}\t{css_tag}{definition[2:]}\n")
                          if "mobi_th_pron_en" in files:
-                             files["mobi_th_pron_en"].write(f"{key}\t{mobi_css_tag}{definition[2:]}\n")
+                             files["mobi_th_pron_en"].write(f"{key}\t{definition[2:]}\n")
                      else:
                          # Remove eng from definition? But complicated.
                          # For now, assume if not incl, just thai
                          # But to keep simple, always include for now
                          files["th_pron_en"].write(f"{key}\t{css_tag}{definition[2:]}\n")
                          if "mobi_th_pron_en" in files:
-                             files["mobi_th_pron_en"].write(f"{key}\t{mobi_css_tag}{definition[2:]}\n")
+                             files["mobi_th_pron_en"].write(f"{key}\t{definition[2:]}\n")
 
         # Thai pronunciation merge to English
         if self.config.th_pron_merge and "th_pron_merge_en" in files:
@@ -775,7 +771,7 @@ class DictionaryProcessor:
                 value = "<br><br>".join(definitions) if definitions else ""
                 files["th_pron_merge_en"].write(f"{key}\t{css_tag}{value}\n")
                 if "mobi_th_pron_merge_en" in files:
-                    files["mobi_th_pron_merge_en"].write(f"{key}\t{mobi_css_tag}{value}\n")
+                    files["mobi_th_pron_merge_en"].write(f"{key}\t{value}\n")
 
         # English to Thai
         for english_word, type_groups in en_th_data.items():
@@ -802,8 +798,7 @@ class DictionaryProcessor:
             files["en_th"].write(f"{english_word}\t{word_definition}\n")
             if "mobi_en_th" in files:
                 mobi_word_definition = (
-                    mobi_css_tag
-                    + f'<span class="english"><strong>{english_word}</strong></span> <br>'
+                    f'<span class="english"><strong>{english_word}</strong></span> <br>'
                     + "<br>".join(type_entries)
                 )
                 files["mobi_en_th"].write(f"{english_word}\t{mobi_word_definition}\n")

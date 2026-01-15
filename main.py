@@ -152,20 +152,23 @@ def main() -> int:
             processor = DictionaryProcessor(config, config.dictionary.css_content)
         processor.process_excel_file()
 
-        # Build Stardict packages
-        builder = StardictBuilder(
-            args.output_dir, stardict_dir, css_content=config.dictionary.css_content, config=config.dictionary
-        )
-        logging.info("Converting to Stardict format...")
-        builder.convert_to_stardict()
+        if not args.create_mobi:
+            # Build Stardict packages
+            builder = StardictBuilder(
+                args.output_dir, stardict_dir, css_content=config.dictionary.css_content, config=config.dictionary
+            )
+            logging.info("Converting to Stardict format...")
+            builder.convert_to_stardict()
 
-        logging.info("Creating zip packages...")
-        zip_files = builder.create_zip_packages()
+            logging.info("Creating zip packages...")
+            zip_files = builder.create_zip_packages()
 
-        # Convert to MDX format (CSS handled in definitions)
-        mdx_builder = MdictBuilder(args.output_dir, mdict_dir, None, config=config.dictionary)
-        logging.info("Converting to MDX format...")
-        mdx_builder.convert_to_mdx()
+            # Convert to MDX format (CSS handled in definitions)
+            mdx_builder = MdictBuilder(args.output_dir, mdict_dir, None, config=config.dictionary)
+            logging.info("Converting to MDict format...")
+            mdx_builder.convert_to_mdx()
+        else:
+            zip_files = []  # No zip files created for MOBI mode
 
         # Convert to MOBI format if requested and calibre is available
         if args.create_mobi and mobi_txt_dir:
