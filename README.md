@@ -13,7 +13,6 @@
  - many expressions, like: ทิ้งไว้ [thíng wái] v. exp. leave behind ; leave undone<br>
   - **New**: HTML-formatted definitions with CSS styling for GoldenDict NG<br>
   - **New**: Pronunciation-based search dictionaries (.pr and .pr-merge variants)<br>
-  - **New**: Automatic MOBI file generation for Kindle using Calibre<br>
   - **New**: Inline CSS support (--inline-css) for embedded styling
   - **New**: Compressed Stardict dictionaries (.dict.dz) for reduced file sizes<br><br><br>
 
@@ -28,14 +27,14 @@
 
 
 
-<img  style='width:70%;max-width:1445px;'  src='https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_thai_lookup.png'><br>
+<img  style="width:500px;"  src="https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_thai_lookup.png"><br>
 the dictioanry is bilangual: Thai-English <br><br>
 
-<img style='width:70%;max-width:1445px;' src='https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_english_lookup.png'>
+<img style='width:500px;' src='https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_english_lookup.png'>
     
 and English-Thai has a Level to each word, judging how basic it is (B = basic, A1 = intermediate, A2 = advanced, s = special).<br><br><br>
 
-<img  style='width:70%;max-width:1445px;'  src='https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_pronouciation_search-dictbox_android.png'><br>
+<img  style='width:500px;'  src='https://github.com/windwerfer/volubilis_dict/blob/main/screenshot/example_pronouciation_search-dictbox_android.png'><br>
  there is a pronounciation search. eg .maa (the sound of the thai word) would find มา, ม้า and หมา. almost every word has a pronuciation entry. The .pr-merge variant groups words by pronunciation, showing tone-variants together.<br><br><br>
 
 this project converts the Volubilis Thai-English dictionary (released as spread sheat or pdf) to a standart dictionary format.<br><br><br>
@@ -58,16 +57,13 @@ Create complete Stardict packages from Excel file:
 # Create Stardict and MDict packages
 python main.py src/vol_mundo_01.11.2025.xlsx
 
-# Create Stardict, MDict, and MOBI packages
-python main.py src/vol_mundo_01.11.2025.xlsx --create-mobi
 ```
 
 The command will:
 1. Process the Excel file to tab-separated text files
 2. Convert to Stardict format (.ifo/.idx/.dict files)
-3. Package each dictionary with CSS resources into individual zip files
-4. Convert to MDict format (.mdx/.mdd)
-5. Optionally convert to MOBI format for Kindle (with --create-mobi)
+3. Convert to MDict format (.mdx/.mdd)
+
 
 ### Command Line Options
 
@@ -89,24 +85,9 @@ options:
   --refresh-cache       Force refresh of cache even if valid
    --inline-css          Inline CSS styles in each dictionary entry
    --no-dz               Disable .dict.dz compression for Stardict format
-   --create-mobi         Create MOBI format files for Kindle
+   --create-mobi         Create MOBI format files for Kindle (not working correctly at the moment)
 ```
 
-### Configuration
-
-The dictionary generation can be customized via environment variables or `src/config.py`. A `.env` file is provided with all default values.
-
-
-#### Configuration Options
-
-Key options include:
-
-#### Dictionary Processing
-- `columns`: Number of columns to process (default: 32)
-- `paiboon`: Enable Paiboon transcription system (default: True)
-- `debug_test_1000_rows`: Process only first 1000 rows for testing (default: True)
-- `inline_css`: Inline CSS styles in definitions instead of linking (default: False)
-- `no_dz`: Disable dictzip compression for Stardict .dict files (default: False)
 
 #### Pronunciation Dictionaries
 - `th_pron`: Enable/disable pronunciation dictionary generation (default: True)
@@ -118,23 +99,7 @@ Key options include:
 - `th_pron_merge_incl_translation_in_headword`: Include translations in merge headwords (default: False)
 - `th_pron_merge_max_headword_length`: Maximum length for merge headwords (default: 50)
 
-#### MOBI Build Options
-- `enable_mobi_build`: Legacy option for MOBI file generation (deprecated, use --create-mobi)
-- `create_mobi`: Enable/disable MOBI file generation for Kindle (default: False)
-  - **Requires**: Calibre (`ebook-convert` command) must be installed
-  - **Output**: Creates `.mobi` files in `mobi/` directory
 
-### Python API
-
-```python
-from src.config import Config
-from src.dictionary_processor import DictionaryProcessor
-
-# Load configuration (supports environment variables)
-config = Config.from_file()
-processor = DictionaryProcessor(config)
-processor.process_excel_file()
-```
 
 ### Caching
 
@@ -193,44 +158,7 @@ The processed dictionary uses standard HTML with CSS classes instead of custom t
 - `<span class="note">` for notes
 - `<span class="science">` for scientific classifications
 
-### Stardict Format
 
-Convert tab-separated output to Stardict format:
-
-```bash
-# Install pyglossary and idzip
-pip install pyglossary idzip
-
-# Convert Thai-English (with compression)
-pyglossary -w "dictzip=true" stardict/txt/volubilis_th-en.txt stardict_output/volubilis_th-en.ifo
-
-# Convert English-Thai (with compression)
-pyglossary -w "dictzip=true" stardict/txt/volubilis_en-th.txt stardict_output/volubilis_en-th.ifo
-```
-
-The latest Stardict files are available in the `stardict/` directory as individual zip packages with compressed `.dict.dz` files for smaller sizes.
-
-### MOBI Format for Kindle
-
-MOBI files for Kindle are generated when `--create-mobi` is used or `create_mobi = True` in the configuration.
-
-**Requirements:**
-- Install [Calibre](https://calibre-ebook.com/) (provides the `ebook-convert` command)
-- Ensure `ebook-convert` is in your PATH
-
-**Usage:**
-```bash
-# MOBI files are created when --create-mobi is specified
-python main.py src/vol_mundo_01.11.2025.xlsx --create-mobi
-
-# Files will be available in mobi/:
-# - volubilis_th-en.mobi
-# - volubilis_en-th.mobi
-# - volubilis_th-pr-en.mobi
-# - volubilis_th-pr-merge-en.mobi
-```
-
-Transfer these `.mobi` files directly to your Kindle device or use with Kindle apps.
 
 ## Development
 
@@ -250,20 +178,6 @@ pytest tests/test_config.py
 pytest -v
 ```
 
-### Project Structure
-
-```
-
-
-  Readable through <a href='http://www.huzheng.org/stardict/'>Stardict</a> (win/linux), <a href='https://www.mdict.cn/'>Mdict</a> (android/ios), <a href='http://goldendict.org/'>GoldenDict</a> (win/linux/android), <a href='https://www.google.co.th/url?sa=t&source=web&rct=j&url=https://play.google.com/store/apps/details%3Fid%3Dcom.grandsons.dictboxxth%26hl%3Den%26gl%3DUS%26referrer%3Dutm_source%253Dgoogle%2526utm_medium%253Dorganic%2526utm_term%253Ddict%2Bbox%2Bapp%2Bstore%26pcampaignid%3DAPPU_1_nfq6Y6nnDfOgz7sPt-CzqAU&ved=2ahUKEwjpqcaUvbj8AhVz0HMBHTfwDFUQ8oQBegQIChAB&usg=AOvVaw0SlLHjPWaRVXbk4INevGNt'>Dictbox</a> (android 4-9), Kindle (MOBI/EPUB format)<br><br>
-  Output formats: Stardict (.ifo/.idx/.dict.dz/.syn/.res.zip), MDict (.mdx/.mdd), MOBI for Kindle<br><br><br>
-
-  <b>Install / use:</b>
-   to be able to use the dictionary files, you need to download one of the dictionary apps from above and then download the compiled Stardict zip packages from the `stardict/` directory (.ifo/.idx/.dict.dz/.syn/.res.zip for Stardict/GoldenDict, .mdx/.mdd for Mdict) and after extracting, copy them into the dictionary folder.<br><br>
-
-**GoldenDict NG Users:** Each Stardict zip package includes a `res.zip` with CSS for automatic styling with light/dark themes.<br><br>
-
-**Kindle Users:** The `mobi/` folder contains ready-to-use `.mobi` files created with Calibre. These can be directly transferred to your Kindle device or used with Kindle apps.<br><br><br><br><br><br><br>
 
 
 ## Excel Column Mapping
@@ -322,35 +236,6 @@ The codebase has been completely rewritten with modern Python practices:
 - **Testing**: Unit tests with pytest
 - **CLI Interface**: Command-line interface with argparse
 
-### Key Improvements
-
-1. **TextFormatter**: Handles all regex transformations and text processing
-2. **DictionaryProcessor**: Main Excel parsing and data processing logic with intelligent caching
-3. **FileHandler**: Safe file I/O with context managers
-4. **Config**: Centralized configuration with environment variable support
-5. **Custom Exceptions**: Proper error handling hierarchy
-6. **Caching System**: Automatic caching with validation for faster development and testing
-7. **HTML Conversion**: Transforms custom tags to standard HTML with CSS classes for modern dictionary apps
-8. **GoldenDict NG Support**: Includes CSS themes with light/dark mode for enhanced readability
-9. **Automated Pipeline**: Single command creates complete Stardict packages with proper directory structure
- 10. **Stardict Builder**: Integrated conversion and packaging system for professional distribution
- 11. **Pronunciation Dictionaries**: Generates pronunciation-based search variants (.pr and .pr-merge)
- 12. **Tone-Aware Sorting**: Pronunciation merge groups words by sound with proper tone ordering
- 13. **MOBI Support**: Automatic Kindle .mobi file generation using Calibre
- 14. **MDict Support**: Automatic .mdx/.mdd file generation for MDict readers
- 15. **Inline CSS Option**: Embed CSS directly in definitions for self-contained dictionaries
- 16. **Dictzip Compression**: Compress Stardict .dict files to .dict.dz for smaller packages
- 17. **Environment Configuration**: Flexible configuration via .env files and environment variables
- 18. **Comprehensive Testing**: Extensive unit test suite with 50+ tests covering all major components
- 19. **Modern Python**: Type hints, dataclasses, and clean architecture throughout
-
-### Legacy Code
-
-The original scripts have been removed. Legacy documentation is preserved in `src/readme.txt` for reference.
-
-The new codebase provides the same functionality with better maintainability and extensibility.
-
-the script was written without any thought of publishing it (bad coding, and lots of manual intervention, so just: for research purposes), but because i use the final product myself a lot, i thought i make it available.
 
 ---
 
