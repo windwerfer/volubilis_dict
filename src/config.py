@@ -151,9 +151,11 @@ class DictionaryConfig:
 
     # CSS options
     inline_css: bool = False
+
+    # removed dark theme css style, dict readers convert it by themselfs
+    # dictango can not handle custom dark theme, it reconverts it to light -> black text on black bg
     css_content: str = """
 
-    /* Light theme */
     .thai { font-weight: bold; color: #000080; }
     .pron { color: #008000; font-style: italic; }
     .def { }
@@ -165,19 +167,6 @@ class DictionaryConfig:
     .type { font-style: italic; color: #000080; }
     .clf { font-style: italic; }
 
-    /* Dark theme */
-    @media (prefers-color-scheme: dark) {
-    body { background-color: #121212; color: #ffffff; }
-    .thai { color: #87ceeb; }
-    .pron { color: #90ee90; }
-    .syn { color: #dda0dd; }
-    .description { }
-    .science { font-size: smaller; }
-    .note { color: #d3d3d3; }
-    .level { font-size: smaller; }
-    .english { color: #ff6347; }
-    .type { color: #87ceeb; }
-    }
 """
 
     # MOBI style mapping for inline styles
