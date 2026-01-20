@@ -27,6 +27,9 @@ class YomitanBuilder:
 
     def convert_to_yomitan(self) -> List[Path]:
         """Convert all txt files to Yomichan format."""
+        # Inline CSS styles in txt files
+        self._inline_styles()
+
         output_files = []
 
         txt_files = list(self.txt_dir.glob("volubilis_*.txt"))
@@ -38,6 +41,21 @@ class YomitanBuilder:
             output_files.append(output_file)
 
         return output_files
+
+    def _inline_styles(self) -> None:
+        """Inline CSS styles in Yomitan txt files by replacing classes with style attributes."""
+        import re
+
+        txt_files = list(self.txt_dir.glob("volubilis_*.txt"))
+        for txt_file in txt_files:
+            content = txt_file.read_text(encoding="utf-8")
+            # Remove any <style> blocks
+            content = re.sub(r'<style[^>]*>.*?</style>', '', content, flags=re.DOTALL)
+            # Apply style replacements
+            if self.config and self.config.style_mapping:
+                for class_attr, style_attr in self.config.style_mapping.items():
+                    content = content.replace(class_attr, style_attr)
+            txt_file.write_text(content, encoding="utf-8")
 
     def _convert_single_file(self, txt_file: Path) -> Path:
         """Convert a single txt file to Yomichan format."""

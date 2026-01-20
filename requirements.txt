@@ -8,3 +8,4 @@ progressbar2
 mdict-utils
 python-idzip
 beautifulsoup4
+lxml
