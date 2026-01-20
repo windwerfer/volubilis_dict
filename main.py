@@ -167,8 +167,15 @@ def main() -> int:
             mdx_builder = MdictBuilder(args.output_dir, mdict_dir, None, config=config.dictionary)
             logging.info("Converting to MDict format...")
             mdx_builder.convert_to_mdx()
-        else:
-            zip_files = []  # No zip files created for MOBI mode
+
+            logging.info("Creating MDict zip package...")
+            mdict_zip_file = mdx_builder.create_zip_package()
+
+            logging.info("Processing completed successfully")
+            all_zip_files = zip_files + [mdict_zip_file]
+            logging.info(f"Created {len(all_zip_files)} packages:")
+            for zip_file in all_zip_files:
+                logging.info(f"  - {zip_file}")
 
         # Convert to MOBI format if requested and calibre is available
         if args.create_mobi and mobi_txt_dir:
@@ -182,10 +189,7 @@ def main() -> int:
             else:
                 logging.warning("Calibre not found - skipping MOBI conversion")
 
-        logging.info("Processing completed successfully")
-        logging.info(f"Created {len(zip_files)} Stardict packages:")
-        for zip_file in zip_files:
-            logging.info(f"  - {zip_file}")
+            logging.info("Processing completed successfully")
 
         # Final check for MOBI build requirements
         if config.dictionary.enable_mobi_build:

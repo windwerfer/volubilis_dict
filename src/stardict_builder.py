@@ -88,7 +88,7 @@ class StardictBuilder:
 
 
     def create_zip_packages(self) -> List[Path]:
-        """Create individual zip packages for each dictionary."""
+        """Create a single zip package containing all dictionaries."""
         zip_files = []
 
         # Copy res.zip to txt dir as css.zip if it exists
@@ -97,11 +97,15 @@ class StardictBuilder:
         if res_zip.exists():
             shutil.copy(res_zip, css_zip)
 
-        # Find all .ifo files and create zips
+        # Find all .ifo files
         ifo_files = list(self.unzipped_dir.glob("*.ifo"))
-        for ifo_file in ifo_files:
-            zip_file = self._create_single_zip(ifo_file)
-            zip_files.append(zip_file)
+        if not ifo_files:
+            return zip_files
+
+        # Create a single zip package for all dictionaries
+        zip_file = self.stardict_dir / "volubilis_all_stardict.zip"
+        self._create_combined_zip(ifo_files, zip_file)
+        zip_files.append(zip_file)
 
         return zip_files
 
@@ -123,34 +127,34 @@ class StardictBuilder:
 
         ifo_file.write_text("\n".join(updated_lines), encoding="utf-8")
 
-    def _create_single_zip(self, ifo_file: Path) -> Path:
-        """Create a zip package for a single dictionary."""
-        base_name = ifo_file.stem  # Remove .ifo extension
-        zip_file = self.stardict_dir / f"{base_name}.zip"
-
-        # Find all related files
+    def _create_combined_zip(self, ifo_files: List[Path], zip_file: Path) -> None:
+        """Create a single zip package containing all dictionaries."""
         files_to_zip = []
         dict_ext = ".dict" if self.config.no_dz else ".dict.dz"
-        for ext in [".ifo", ".idx", ".syn", dict_ext]:
-            f = ifo_file.with_suffix(ext)
-            if f.exists():
-                files_to_zip.append(f)
 
-        # Add res.zip with styles.css (only if not inline CSS)
-        if not self.config.inline_css:  # type: ignore
-            res_file = self.unzipped_dir / f"{base_name}.res.zip"
-            css_content = self.css_content or ""
+        for ifo_file in ifo_files:
+            base_name = ifo_file.stem
+            # Find all related files for this dictionary
+            for ext in [".ifo", ".idx", ".syn", dict_ext]:
+                f = ifo_file.with_suffix(ext)
+                if f.exists():
+                    files_to_zip.append(f)
 
-            import zipfile
+            # Add res.zip with styles.css (only if not inline CSS)
+            if not self.config.inline_css:  # type: ignore
+                res_file = self.unzipped_dir / f"{base_name}.res.zip"
+                css_content = self.css_content or ""
 
-            with zipfile.ZipFile(res_file, "w", zipfile.ZIP_DEFLATED) as zf:
-                zf.writestr("styles.css", css_content)
-            files_to_zip.append(res_file)
+                import zipfile
+
+                with zipfile.ZipFile(res_file, "w", zipfile.ZIP_DEFLATED) as zf:
+                    zf.writestr("styles.css", css_content)
+                files_to_zip.append(res_file)
 
         if not files_to_zip:
-            raise FileNotFoundError(f"No files found for {base_name}")
+            raise FileNotFoundError("No files found for any dictionary")
 
-        logger.info(f"Creating zip package: {zip_file}")
+        logger.info(f"Creating combined zip package: {zip_file}")
 
         # Create zip file
         import zipfile
@@ -160,5 +164,3 @@ class StardictBuilder:
                 arcname = file_path.name
                 zf.write(file_path, arcname)
                 logger.debug(f"Added {file_path} as {arcname}")
-
-        return zip_file

@@ -143,3 +143,27 @@ class MdictBuilder:
             processed_lines.append(f"{headword}\n{definition}\n</>\n")
 
         return "".join(processed_lines)
+
+    def create_zip_package(self) -> Path:
+        """Create a single zip package containing all MDX files."""
+        import zipfile
+
+        zip_file = self.mdict_dir / "volubilis_all_mdict.zip"
+
+        # Find all .mdx and .mdd files
+        files_to_zip = []
+        for ext in [".mdx", ".mdd"]:
+            files_to_zip.extend(self.mdict_dir.glob(f"*{ext}"))
+
+        if not files_to_zip:
+            raise FileNotFoundError(f"No MDX or MDD files found in {self.mdict_dir}")
+
+        logger.info(f"Creating MDict zip package: {zip_file}")
+
+        with zipfile.ZipFile(zip_file, "w", zipfile.ZIP_DEFLATED) as zf:
+            for file_path in files_to_zip:
+                arcname = file_path.name
+                zf.write(file_path, arcname)
+                logger.debug(f"Added {file_path} as {arcname}")
+
+        return zip_file
