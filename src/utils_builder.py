@@ -12,7 +12,7 @@ class UtilsBuilder:
 
     @staticmethod
     def setup_resources(
-        stardict_dir: Path, mdict_dir: Path, config, mobi_dir: Optional[Path] = None
+        stardict_dir: Path, mdict_dir: Path, config, mobi_dir: Optional[Path] = None, yomitan_dir: Optional[Path] = None
     ) -> None:
         """Setup common directories and static files like CSS."""
         # Create directories
@@ -21,19 +21,24 @@ class UtilsBuilder:
         (stardict_dir / "unzipped").mkdir(exist_ok=True)
         mdict_dir.mkdir(exist_ok=True)
         (mdict_dir / "txt").mkdir(exist_ok=True)
+        if yomitan_dir:
+            yomitan_dir.mkdir(exist_ok=True)
+            (yomitan_dir / "txt").mkdir(exist_ok=True)
         if config.dictionary.create_mobi and mobi_dir:
             mobi_dir.mkdir(exist_ok=True)
             (mobi_dir / "txt").mkdir(exist_ok=True)
 
-        # Write CSS to both locations
+        # Write CSS to locations
         css_content = config.dictionary.css_content
-        css_file_stardict = stardict_dir / "txt" / "styles.css"
-        css_file_mdict_txt = mdict_dir / "txt" / "styles.css"
+        css_files = [
+            stardict_dir / "txt" / "styles.css",
+            mdict_dir / "txt" / "styles.css",
+        ]
+        if yomitan_dir:
+            css_files.append(yomitan_dir / "txt" / "styles.css")
 
-        css_file_stardict.write_text(css_content, encoding="utf-8")
-        css_file_mdict_txt.parent.mkdir(
-            parents=True, exist_ok=True
-        )  # Ensure txt dir exists
-        css_file_mdict_txt.write_text(css_content, encoding="utf-8")
+        for css_file in css_files:
+            css_file.parent.mkdir(parents=True, exist_ok=True)
+            css_file.write_text(css_content, encoding="utf-8")
 
-        logger.info(f"CSS written to {css_file_stardict} and {css_file_mdict_txt}")
+        logger.info(f"CSS written to {', '.join(str(f) for f in css_files)}")

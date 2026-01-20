@@ -11,6 +11,7 @@ from src.dictionary_processor import DictionaryProcessor
 from src.mdict_builder import MdictBuilder
 from src.mobi_builder import MobiBuilder
 from src.stardict_builder import StardictBuilder
+from src.yomitan_builder import YomitanBuilder
 from src.utils_builder import UtilsBuilder
 
 
@@ -141,15 +142,17 @@ def main() -> int:
         # Setup shared resources
         stardict_dir = Path("stardict")
         mdict_dir = Path("mdict")
+        yomitan_dir = Path("yomitan")
+        yomitan_txt_dir = Path("yomitan/txt")
         mobi_txt_dir = None
         if args.create_mobi:
             mobi_dir = Path("mobi")
-            UtilsBuilder.setup_resources(stardict_dir, mdict_dir, config, mobi_dir)
+            UtilsBuilder.setup_resources(stardict_dir, mdict_dir, config, mobi_dir, yomitan_dir)
             mobi_txt_dir = Path("mobi/txt")
             processor = DictionaryProcessor(config, config.dictionary.css_content, mobi_txt_dir)
         else:
-            UtilsBuilder.setup_resources(stardict_dir, mdict_dir, config)
-            processor = DictionaryProcessor(config, config.dictionary.css_content)
+            UtilsBuilder.setup_resources(stardict_dir, mdict_dir, config, yomitan_dir=yomitan_dir)
+            processor = DictionaryProcessor(config, config.dictionary.css_content, yomitan_txt_dir)
         processor.process_excel_file()
 
         if not args.create_mobi:
@@ -171,8 +174,13 @@ def main() -> int:
             logging.info("Creating MDict zip package...")
             mdict_zip_file = mdx_builder.create_zip_package()
 
+            # Convert to Yomichan format
+            yomitan_builder = YomitanBuilder(yomitan_txt_dir, yomitan_dir, css_content=config.dictionary.css_content, config=config.dictionary)
+            logging.info("Converting to Yomichan format...")
+            yomitan_files = yomitan_builder.convert_to_yomitan()
+
             logging.info("Processing completed successfully")
-            all_zip_files = zip_files + [mdict_zip_file]
+            all_zip_files = zip_files + [mdict_zip_file] + yomitan_files
             logging.info(f"Created {len(all_zip_files)} packages:")
             for zip_file in all_zip_files:
                 logging.info(f"  - {zip_file}")
