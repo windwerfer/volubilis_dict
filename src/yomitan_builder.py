@@ -2,6 +2,7 @@
 
 import logging
 import subprocess
+import zipfile
 from pathlib import Path
 from typing import List, Optional
 
@@ -22,6 +23,7 @@ class YomitanBuilder:
     ):
         self.txt_dir = txt_dir
         self.yomitan_dir = yomitan_dir
+        self.unzipped_dir = yomitan_dir / "unzipped"
         self.css_content = css_content
         self.config = config
 
@@ -29,6 +31,9 @@ class YomitanBuilder:
         """Convert all txt files to Yomichan format."""
         # Inline CSS styles in txt files
         self._inline_styles()
+
+        # Create unzipped directory
+        self.unzipped_dir.mkdir(exist_ok=True)
 
         output_files = []
 
@@ -63,12 +68,14 @@ class YomitanBuilder:
         output_name = txt_file.stem
         logger.debug(f"Processing file: {txt_file.name}, output: {output_name}")
 
-        output_file = self.yomitan_dir / f"{output_name}.zip"
+        # Output the zip to unzipped dir first
+        temp_zip = self.unzipped_dir / f"{output_name}.zip"
+        final_zip = self.yomitan_dir / f"{output_name}.zip"
 
-        logger.info(f"Converting {txt_file} to {output_file} using Yomichan format")
+        logger.info(f"Converting {txt_file} to {final_zip} using Yomichan format")
 
         try:
-            cmd = ["pyglossary", "--write-format=Yomichan", str(txt_file), str(output_file)]
+            cmd = ["pyglossary", "--write-format=Yomichan", str(txt_file), str(temp_zip)]
             result = subprocess.run(
                 cmd,
                 capture_output=True,
@@ -78,9 +85,24 @@ class YomitanBuilder:
 
             logger.debug(f"pyglossary output: {result.stdout}")
 
+            # Unzip to unzipped dir
+            with zipfile.ZipFile(temp_zip, 'r') as zf:
+                zf.extractall(self.unzipped_dir)
+
+            # Remove the temp zip
+            temp_zip.unlink()
+
+            # Zip the unzipped files with compression level 6
+            with zipfile.ZipFile(final_zip, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
+                for file_path in self.unzipped_dir.rglob('*'):
+                    if file_path.is_file():
+                        arcname = file_path.relative_to(self.unzipped_dir)
+                        zf.write(file_path, arcname)
+                        logger.debug(f"Added {file_path} as {arcname} to {final_zip}")
+
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to convert {txt_file}: {e}")
             logger.error(f"stderr: {e.stderr}")
             raise
 
-        return output_file
+        return final_zip
