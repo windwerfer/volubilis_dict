@@ -1,0 +1,22 @@
+{
+  "name": "volubilis_dict",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt && echo '✅ Python environment ready!'",
+  "remoteUser": "dev",
+  "containerUser": "dev",
+  "updateRemoteUserUID": true,
+  "runArgs": ["--userns=keep-id:uid=1000,gid=1000"],
+  "containerEnv": {
+    "HOME": "/home/dev"
+  },
+  "customizations": {
+    "zed": {
+      "extensions": [
+        "mcp-server-sequential-thinking",
+        "mcp-server-context7"
+      ]
+    }
+  }
+}
