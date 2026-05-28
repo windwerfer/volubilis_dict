@@ -9,3 +9,4 @@ mdict-utils
 python-idzip
 beautifulsoup4
 lxml
+prompt-toolkit>=3.0.0
