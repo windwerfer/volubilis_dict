@@ -1,13 +1,13 @@
-FROM docker.io/library/python:3.12-slim-trixie
+FROM python:3.12-trixie
 
-# ── Install basic tools ──
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    curl \
-    ca-certificates \
+    sudo \
+    nano \
+    less \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
-# ── Create non-root user (best practice) ──
+# ── Create non-root user ──
 ARG USERNAME=dev
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
@@ -18,9 +18,9 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
-# Switch to non-root user
+
 USER $USERNAME
 WORKDIR /workspace
 
-# Upgrade pip
+SHELL ["/bin/bash", "-c"]
 RUN pip install --no-cache-dir --upgrade pip
