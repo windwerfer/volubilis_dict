@@ -13,7 +13,7 @@ ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
 RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME --shell /bin/bash \
     && mkdir -p /etc/sudoers.d \
     && echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
@@ -21,6 +21,8 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 USER $USERNAME
 WORKDIR /workspace
+
+ENV PATH="/home/dev/.local/bin:/home/dev/.opencode/bin:${PATH}"
 
 SHELL ["/bin/bash", "-c"]
 RUN pip install --no-cache-dir --upgrade pip
