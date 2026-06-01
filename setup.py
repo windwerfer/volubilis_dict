@@ -5,9 +5,13 @@ from setuptools import setup, find_packages
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+version = {}
+with open("src/__init__.py", encoding="utf-8") as f:
+    exec(f.read(), version)
+
 setup(
     name="volubilis-dict",
-    version="1.0.5",
+    version=version["__version__"],
     author="Volubilis Dictionary Team",
     description="Process Volubilis Thai-English dictionary Excel files",
     long_description=long_description,

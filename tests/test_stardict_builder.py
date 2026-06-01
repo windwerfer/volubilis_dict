@@ -5,6 +5,7 @@ from unittest.mock import patch, MagicMock
 from pathlib import Path
 
 from src.stardict_builder import StardictBuilder
+from src import __version__
 
 
 class TestStardictBuilder:
@@ -181,8 +182,8 @@ description=test dictionary
 
         # Check that version and description were updated
         updated_content = ifo_file.read_text()
-        assert "version=1.0.5" in updated_content
-        assert "description=Volubilis Thai-English Dictionary v1.0.5" in updated_content
+        assert f"version={__version__}" in updated_content
+        assert f"description=Volubilis Thai-English Dictionary v{__version__}" in updated_content
 
     def test_create_single_zip(self, temp_dir):
         """Test creation of individual zip packages."""

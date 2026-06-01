@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .config import Config
 from .dictionary_processor import DictionaryProcessor
+from .__init__ import __version__ as _pkg_version
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -68,7 +69,11 @@ Examples:
     )
 
     parser.add_argument(
-        '--verbose', '-v',
+        '-v', '--version', action='version', version=f'%(prog)s {_pkg_version}', help='Show program\'s version number and exit'
+    )
+
+    parser.add_argument(
+        '--verbose',
         action='store_true',
         help='Enable verbose logging'
     )

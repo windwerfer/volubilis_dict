@@ -13,6 +13,7 @@ from src.mobi_builder import MobiBuilder
 from src.stardict_builder import StardictBuilder
 from src.yomitan_builder import YomitanBuilder
 from src.utils_builder import UtilsBuilder
+from src import __version__
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -74,7 +75,11 @@ Examples:
     )
 
     parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Enable verbose logging"
+        "-v", "--version", action="version", version=f"%(prog)s {__version__}", help="Show program's version number and exit"
+    )
+
+    parser.add_argument(
+        "--verbose", action="store_true", help="Enable verbose logging"
     )
 
     parser.add_argument(

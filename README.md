@@ -2,9 +2,8 @@
 
    unofficial dictionary (stardict/mdict/yomitan) files for the volubilis project (https://belisan-volubilis.blogspot.com).<br>
    <br>
-    most recent version: 01.11.2025 (processed 2025-11-11).<br>
-    software version: 1.2.0<br>
-  <br>
+     most recent version: 01.11.2025 (processed 2025-11-11).<br>
+   <br>
 
 
   - 106'141 entries thai-english<br>

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List, Optional, cast
 
 from .config import DictionaryConfig
+from .__init__ import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -117,10 +118,10 @@ class StardictBuilder:
         updated_lines = []
         for line in lines:
             if line.startswith("version="):
-                updated_lines.append("version=1.0.5")
+                updated_lines.append(f"version={__version__}")
             elif line.startswith("description="):
                 updated_lines.append(
-                    "description=Volubilis Thai-English Dictionary v1.0.5 (data 01.11.2025)"
+                    f"description=Volubilis Thai-English Dictionary v{__version__} (data 01.11.2025)"
                 )
             else:
                 updated_lines.append(line)
