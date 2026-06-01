@@ -603,6 +603,8 @@ class DictionaryProcessor:
     ) -> str:
         """Format a complete definition string with standard HTML and CSS classes."""
         definition = ""
+        if thai:
+            definition += f'<span class="thai">{thai}</span> '
 
         # Add pronunciation
         if pron_formatted:
