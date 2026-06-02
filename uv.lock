@@ -910,6 +910,7 @@ wheels = [
 
 [[package]]
 name = "volubilis-dict"
+version = "1.1"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
