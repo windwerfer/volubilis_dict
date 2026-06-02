@@ -41,11 +41,37 @@ this project converts the Volubilis Thai-English dictionary (released as spread 
 
 ## Installation
 
+### Using uv (recommended, modern & fast)
+
+```bash
+# 1. Install uv (https://docs.astral.sh/uv/)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 2. Clone and sync the project (this creates a .venv and installs everything)
+git clone https://github.com/windwerfer/volubilis_dict.git
+cd volubilis_dict
+uv sync --extra dev
+```
+
+Then use the project with:
+```bash
+uv run python main.py data/vol_mundo_01.11.2025.xlsx --debug-1000
+# or activate the venv: source .venv/bin/activate
+```
+
+`uv sync` uses the `uv.lock` file (generated from `pyproject.toml`) for perfectly reproducible environments.
+
+To update dependencies later: edit `pyproject.toml`, then run `uv lock` followed by `uv sync`.
+
+### Classic pip (no uv)
+
 ```bash
 git clone https://github.com/windwerfer/volubilis_dict.git
 cd volubilis_dict
-pip install -r requirements.txt
+pip install -e ".[dev]"
 ```
+
+This installs the package in editable mode plus the (required) build tools and optional dev dependencies declared in `pyproject.toml`.
 
 ## Recommended Installation
 
@@ -56,6 +82,28 @@ git clone https://github.com/windwerfer/volubilis_dict.git
 then open the project in VSCode or Zed and it will ask if you want to create the Devcontainer. answer yes, and everything that you run/build inside the container will not be able to see anything else on your computer. (so even if a project gets hijacked, you are not exposed). 
 
 also, it makes it easier to develop, because the dev system is reproducable (looks the same on every computer).
+
+## Managing Dependencies (uv + pyproject.toml)
+
+`pyproject.toml` is the **single source of truth** for what the project needs.
+
+- Core + required build tools (openpyxl, pyglossary, mdict-utils, etc.) live under `[project] dependencies`.
+- Test / development tools live under `[project.optional-dependencies] dev`.
+
+### How the "locked" reproducible approach works
+
+Instead of manually maintaining a broad `requirements.txt` with loose pins:
+
+1. You (or a maintainer) edit `pyproject.toml` when adding/changing a dependency.
+2. Run `uv lock`. This resolves the full dependency tree and writes an exact `uv.lock` file (with specific versions + hashes).
+3. Commit `uv.lock`.
+4. Everyone else runs `uv sync` (or `uv sync --extra dev` for tests) → they get **bit-identical** packages.
+
+This is much more reliable than a hand-written `requirements.txt`.
+
+If you don't have uv, `pip install -e ".[dev]"` still works (it reads pyproject.toml directly and gives you the required build tools + optional dev tools).
+
+To revert to the old broad requirements.txt style, just restore `requirements.txt.bak`.
 
 ## Usage
 

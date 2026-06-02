@@ -26,3 +26,4 @@ ENV PATH="/home/dev/.local/bin:/home/dev/.opencode/bin:${PATH}"
 
 SHELL ["/bin/bash", "-c"]
 RUN pip install --no-cache-dir --upgrade pip
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh

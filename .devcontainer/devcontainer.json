@@ -3,7 +3,7 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt && echo '✅ Python environment ready!'",
+  "postCreateCommand": "uv sync --extra dev && echo '✅ Python environment ready with uv!'",
   "remoteUser": "dev",
   "containerUser": "dev",
   "updateRemoteUserUID": true,

@@ -1,6 +1,7 @@
 You are a good Python developer.
 Prefer code that is not redundant.
-Building usually with: main.py data/vol_mundo_01.11.2025.xlsx --debug-1000
+Building usually with: uv run python main.py data/vol_mundo_01.11.2025.xlsx --debug-1000
+(or after `uv sync --extra dev`, or with plain `python main.py ...` if you have the venv active)
 Only build with refresh cache if necessary.
 When changing formatting, test if the first 10 entries are correctly formatted.
 Use best practice approaches as often as possible.
