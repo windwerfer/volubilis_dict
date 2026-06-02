@@ -12,6 +12,8 @@ mdict*/
 stardict*/
 yomitan*/
 
+.~lock.*
+
 # Python packaging / build artifacts
 *.egg-info/
 *.egg

@@ -29,7 +29,12 @@ logger = logging.getLogger(__name__)
 class DictionaryProcessor:
     """Processes Excel dictionary files into various output formats."""
 
-    def __init__(self, config: Config, css_content: Optional[str] = None, mobi_txt_dir: Optional[Path] = None):
+    def __init__(
+        self,
+        config: Config,
+        css_content: Optional[str] = None,
+        mobi_txt_dir: Optional[Path] = None,
+    ):
         self.config = config.dictionary
         self.formatter = TextFormatter(self.config.patterns)
         self.file_handler = FileHandler()
@@ -86,8 +91,10 @@ class DictionaryProcessor:
                     usage = "thai (word)"
                 elif i == 4:
                     usage = "english (definition)"
-                elif i == 7:
+                elif i == 6:
                     usage = "type_word"
+                elif i == 7:
+                    usage = "usage"
                 elif i == 8:
                     usage = "scient"
                 elif i == 9:
@@ -380,15 +387,21 @@ class DictionaryProcessor:
         # Open MOBI files if mobi_txt_dir is set
         if self.mobi_txt_dir:
             mobi_files = {
-                "mobi_th_en": open(self.mobi_txt_dir / "volubilis_th-en.txt", "w", encoding="utf-8"),
+                "mobi_th_en": open(
+                    self.mobi_txt_dir / "volubilis_th-en.txt", "w", encoding="utf-8"
+                ),
                 "mobi_th_pron_en": open(
                     self.mobi_txt_dir / "volubilis_th-pr-en.txt", "w", encoding="utf-8"
                 ),
-                "mobi_en_th": open(self.mobi_txt_dir / "volubilis_en-th.txt", "w", encoding="utf-8"),
+                "mobi_en_th": open(
+                    self.mobi_txt_dir / "volubilis_en-th.txt", "w", encoding="utf-8"
+                ),
             }
             if self.config.th_pron_merge:
                 mobi_files["mobi_th_pron_merge_en"] = open(
-                    self.mobi_txt_dir / "volubilis_th-pr-merge-en.txt", "w", encoding="utf-8"
+                    self.mobi_txt_dir / "volubilis_th-pr-merge-en.txt",
+                    "w",
+                    encoding="utf-8",
                 )
             files.update(mobi_files)
 
@@ -482,9 +495,9 @@ class DictionaryProcessor:
             level,
             english_word,
             dom,
-         )
+        )
 
-         # Collect for pron merge
+        # Collect for pron merge
         if self.config.th_pron_merge:
             for i, thai_syn in enumerate(thai_synonyms):
                 eng_syn = english_synonyms[i] if i < len(english_synonyms) else ""
@@ -702,11 +715,10 @@ class DictionaryProcessor:
         # Determine CSS tag
         if self.config.inline_css and self.css_content:
             # Remove newlines for Stardict txt compatibility
-            css_content_clean = self.css_content.replace('\n', ' ')
+            css_content_clean = self.css_content.replace("\n", " ")
             css_tag = f"<style>{css_content_clean}</style>"
         else:
             css_tag = '<link rel="stylesheet" type="text/css" href="styles.css" />'
-
 
         # Thai to English
         for thai_word, definitions in th_en_data.items():
@@ -726,23 +738,23 @@ class DictionaryProcessor:
                     else pron_word
                 )
                 for definition in definitions:
-                     if self.config.th_pron_incl_translation_in_headword:
-                         # Extract English from definition or use full
-                         # For simplicity, use the definition as is, but perhaps modify pron_headword to include eng
-                         # Wait, currently pron_entry is pron - thai, definition is the full def
-                         # To include eng, perhaps change pron_entry to pron - thai (eng)
-                         # But since eng is in definition, maybe keep as is, or adjust
-                         # For now, since definition includes eng, just write as is
-                         files["th_pron_en"].write(f"{key}\t{css_tag}{definition[2:]}\n")
-                         if "mobi_th_pron_en" in files:
-                             files["mobi_th_pron_en"].write(f"{key}\t{definition[2:]}\n")
-                     else:
-                         # Remove eng from definition? But complicated.
-                         # For now, assume if not incl, just thai
-                         # But to keep simple, always include for now
-                         files["th_pron_en"].write(f"{key}\t{css_tag}{definition[2:]}\n")
-                         if "mobi_th_pron_en" in files:
-                             files["mobi_th_pron_en"].write(f"{key}\t{definition[2:]}\n")
+                    if self.config.th_pron_incl_translation_in_headword:
+                        # Extract English from definition or use full
+                        # For simplicity, use the definition as is, but perhaps modify pron_headword to include eng
+                        # Wait, currently pron_entry is pron - thai, definition is the full def
+                        # To include eng, perhaps change pron_entry to pron - thai (eng)
+                        # But since eng is in definition, maybe keep as is, or adjust
+                        # For now, since definition includes eng, just write as is
+                        files["th_pron_en"].write(f"{key}\t{css_tag}{definition[2:]}\n")
+                        if "mobi_th_pron_en" in files:
+                            files["mobi_th_pron_en"].write(f"{key}\t{definition[2:]}\n")
+                    else:
+                        # Remove eng from definition? But complicated.
+                        # For now, assume if not incl, just thai
+                        # But to keep simple, always include for now
+                        files["th_pron_en"].write(f"{key}\t{css_tag}{definition[2:]}\n")
+                        if "mobi_th_pron_en" in files:
+                            files["mobi_th_pron_en"].write(f"{key}\t{definition[2:]}\n")
 
         # Thai pronunciation merge to English
         if self.config.th_pron_merge and "th_pron_merge_en" in files:
