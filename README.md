@@ -272,43 +272,25 @@ pytest -v
 
 ## Excel Column Mapping
 
-The Excel file uses the following column mapping for data extraction:
+The authoritative mapping lives in `COLUMN_DEFS` (module-level list in
+`src/volubilis_dict/config.py`). `COLUMN_MAPPING` is derived from it and is the
+single source of truth for:
 
-- 0: THAIROM → thai_romanized
-- 1: EASYTHAI → easythai
-- 2: THAIPHON → thaiphon (pronunciation)
-- 3: THA (Thai) → thai (word)
-- 4: ENG (English) → english (definition)
-- 5: FRA (French) → unused
-- 6: TYPE → unused
-- 7: USAGE → type_word
-- 8: SCIENT/abbrev. → scient
-- 9: DOM → dom
-- 10: CLASSIF → classif
-- 11: SYN → syn
-- 12: LEVEL → level
-- 13: NOTE → note
-- 14: SPA (Spanish) → unused
-- 15: ITA (Italian) → unused
-- 16: POR (Portuguese) → unused
-- 17: DEU (German) → unused
-- 18: NLD (Dutch) → unused
-- 19: NOR (Norwegian [bokmål]) → unused
-- 20: TUR (Turkish) → unused
-- 21: MSA (Malay [Rumi script]) → unused
-- 22: IND (Indonesian) → unused
-- 23: FIL (Filipino [Tagalog (tgl)]) → unused
-- 24: VIE (Vietnamese [chữ quốc ngữ]) → unused
-- 25: RUS1 (Russian) → unused
-- 26: RUS2 (Russian [GOST romanization]) → unused
-- 27: LAO1 (Lao) → unused
-- 28: LAO2 (Lao) → unused
-- 29: TTS1 [Isan] → unused
-- 30: TTS2 [Isan] → unused
-- 31: KOR1 (Korean [Hangeul]) → unused
-- 32: KOR2 (Korean [Revised Romanization of Korean]) → unused
-- 33: ZHO1 (Chinese [simplified/traditional]) → unused
-- 34: ZHO2 (Chinese [Pinyin [effective]]) → unused
+- which semantic variable pulls which column (`_get_col("type_word", row)` etc.)
+- the "Column mapping:" log lines printed at startup (always truthful, never
+  drifts from the extraction code)
+
+Notable:
+- 6: TYPE → type_word   (raw grammatical type)
+- 7: USAGE → usage      (register/obsol. etc.)
+- type_word (col 6) + usage (col 7) are combined when making word definitions:
+  the merged label is used for `<span class="word_type">` sections in the
+  English→Thai output and appears in the per-entry `<span class="type">` spans
+  for all Thai→* outputs.
+
+All columns beyond NOTE log as "unused" for the core dictionary data.
+Run the processor to see the exact mapping for your file (it includes the
+original header text like "TYPE Arial 11").
 
 Synonyms are extracted from columns 3 (THA; split by `;`) and 11 (SYN; Thai words in parentheses), joined with `|` for headword synonyms in Stardict format.
 

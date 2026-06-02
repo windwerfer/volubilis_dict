@@ -116,6 +116,55 @@ class RegexPatterns:
     )
 
 
+# Single source of truth for Excel column semantics.
+# Small list: (0-based index, semantic_key for code/_get_col, log_label or None to use key).
+# Both the log output and the imported column variables are generated from this list.
+# "type_word" key for column 6 so that extraction uses type_word = _get_col("type_word")
+# without needing to rename variables elsewhere in the code.
+COLUMN_DEFS: list[tuple[int, str, str | None]] = [
+    (0, "thai_romanized", None),
+    (1, "easythai", None),
+    (2, "thaiphon", "thaiphon (pronunciation)"),
+    (3, "thai", "thai (word)"),
+    (4, "english", "english (definition)"),
+    (5, "french", None),
+    (6, "type_word", "type_word"),  # TYPE column; combined with usage below for en-th grouping
+    (7, "usage", "usage"),
+    (8, "scient", None),
+    (9, "dom", None),
+    (10, "classif", None),
+    (11, "syn", None),
+    (12, "level", None),
+    (13, "note", None),
+    (14, "spanish", None),
+    (15, "italian", None),
+    (16, "portuguese", None),
+    (17, "german", None),
+    (18, "dutch", None),
+    (19, "norwegian", None),
+    (20, "turkish", None),
+    (21, "malay", None),
+    (22, "indonesian", None),
+    (23, "filipino", None),
+    (24, "vietnamese", None),
+    (25, "russian1", None),
+    (26, "russian2", None),
+    (27, "lao1", None),
+    (28, "lao2", None),
+    (29, "korean1", None),
+    (30, "korean2", None),
+    # higher columns in the source file (e.g. ZHO) will log as "unused"
+]
+
+
+def get_column_log_label(index: int) -> str:
+    """Return the log label for a column index from the single source COLUMN_DEFS."""
+    for idx, key, label in COLUMN_DEFS:
+        if idx == index:
+            return label or key
+    return "unused"
+
+
 @dataclass
 class DictionaryConfig:
     """Configuration for dictionary processing."""
@@ -204,42 +253,10 @@ class DictionaryConfig:
     # Regex patterns
     patterns: RegexPatterns = field(default_factory=RegexPatterns)
 
-    # Column indices (0-based)
+    # COLUMN_MAPPING is derived from the single source COLUMN_DEFS (see top of file).
+    # Do not edit the mapping directly; update COLUMN_DEFS instead.
     COLUMN_MAPPING: Dict[str, int] = field(
-        default_factory=lambda: {
-            "thai_romanized": 0,
-            "easythai": 1,
-            "thaiphon": 2,
-            "thai": 3,
-            "thai_pron_added": 4,
-            "english": 5,
-            "french": 6,
-            "type": 7,
-            "usage": 8,
-            "scient": 9,
-            "dom": 10,
-            "classif": 11,
-            "syn": 12,
-            "level": 13,
-            "note": 14,
-            "spanish": 15,
-            "italian": 16,
-            "portuguese": 17,
-            "german": 18,
-            "dutch": 19,
-            "norwegian": 20,
-            "turkish": 21,
-            "malay": 22,
-            "indonesian": 23,
-            "filipino": 24,
-            "vietnamese": 25,
-            "russian1": 26,
-            "russian2": 27,
-            "lao1": 28,
-            "lao2": 29,
-            "korean1": 30,
-            "korean2": 31,
-        }
+        default_factory=lambda: {key: idx for idx, key, _ in COLUMN_DEFS}
     )
 
 

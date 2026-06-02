@@ -8,7 +8,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Tuple, cast
 
-from .config import Config
+from .config import COLUMN_DEFS, Config, get_column_log_label
 from .file_handler import FileHandler
 from .text_formatter import TextFormatter
 
@@ -45,6 +45,17 @@ class DictionaryProcessor:
         if not self.config.cache_file.is_absolute():
             self.config.cache_file = self.config.output_folder / self.config.cache_file
 
+    def _get_col(self, name: str, row: Tuple, default: str = "") -> str:
+        """Import a column value by semantic name from the single source COLUMN_DEFS.
+
+        This removes magic row[N] indices from the processing logic.
+        """
+        idx = self.config.COLUMN_MAPPING.get(name, -1)
+        if idx < 0 or len(row) <= idx:
+            return default
+        val = row[idx]
+        return self.formatter.clean_text(val) if val is not None else default
+
     def process_excel_file(self) -> None:
         """Main method to process the Excel file."""
         if not OPENPYXL_AVAILABLE:
@@ -78,37 +89,13 @@ class DictionaryProcessor:
         rows = list(ws.values)
         if len(rows) > 1:
             header_row = rows[1]  # Second row (index 1)
+            # Generate log from the single source of truth (COLUMN_DEFS via helper).
+            # This ensures the printed mapping always matches the extraction logic.
             mapping_lines = []
             for i, col in enumerate(header_row):
-                usage = "unused"
-                if i == 0:
-                    usage = "thai_romanized"
-                elif i == 1:
-                    usage = "easythai"
-                elif i == 2:
-                    usage = "thaiphon (pronunciation)"
-                elif i == 3:
-                    usage = "thai (word)"
-                elif i == 4:
-                    usage = "english (definition)"
-                elif i == 6:
-                    usage = "type_word"
-                elif i == 7:
-                    usage = "usage"
-                elif i == 8:
-                    usage = "scient"
-                elif i == 9:
-                    usage = "dom"
-                elif i == 10:
-                    usage = "classif"
-                elif i == 11:
-                    usage = "syn"
-                elif i == 12:
-                    usage = "level"
-                elif i == 13:
-                    usage = "note"
+                semantic = get_column_log_label(i)
                 col_clean = str(col).replace("\n", " ")
-                mapping_lines.append(f"{i}: {col_clean} -> {usage}")
+                mapping_lines.append(f"{i}: {col_clean} -> {semantic}")
             logger.info("Column mapping:\n" + "\n".join(mapping_lines))
 
         # Initialize data structures
@@ -213,8 +200,9 @@ class DictionaryProcessor:
         # Ensure output directory exists
         self.file_handler.ensure_directory(self.config.output_folder)
 
-        # Create mock data as tuples (row[3]=Thai, row[5]=English are required)
-        # Include pronunciation data (row[2]) to enable English→Thai processing
+        # Create mock data as tuples. Column positions now follow COLUMN_DEFS / COLUMN_MAPPING
+        # (thai at 3, english at 4, type_word at 6, usage at 7, etc.).
+        # Include pronunciation data (col 2) to enable English→Thai processing.
         mock_data = [
             (
                 "",
@@ -416,23 +404,24 @@ class DictionaryProcessor:
         en_th_data: Dict,
     ) -> bool:
         """Process a single row from the Excel file."""
-        # Validate required columns
-        if len(row) < 5 or not row[4] or not row[3]:  # English and Thai required
+        # Validate required columns (using the mapping for the indices)
+        thai_idx = self.config.COLUMN_MAPPING.get("thai", 3)
+        eng_idx = self.config.COLUMN_MAPPING.get("english", 4)
+        if len(row) <= max(thai_idx, eng_idx) or not row[eng_idx] or not row[thai_idx]:
             return False
 
-        # Extract column values
-        # thai_romanized = self.formatter.clean_text(row[0] if len(row) > 0 else "")
-        # easythai = self.formatter.clean_text(row[1] if len(row) > 1 else "")
-        thaiphon = self.formatter.clean_text(row[2] if len(row) > 2 else "")
-        thai = self.formatter.clean_text(row[3])
-        english = self.formatter.clean_text(row[4])
+        # Extract column values using the single source of truth (no magic row indices).
+        # thai_romanized and easythai are not currently used in processing.
+        thaiphon = self._get_col("thaiphon", row)
+        thai = self._get_col("thai", row)
+        english = self._get_col("english", row)
 
         # Split synonyms
         thai_synonyms = [s.strip() for s in re.split(r"[;=]", thai) if s.strip()]
         english_synonyms = [s.strip() for s in re.split(r"[;=]", english) if s.strip()]
 
         # Extract additional synonyms from SYN column (Thai words in parentheses)
-        syn = self.formatter.clean_text(row[11] if len(row) > 11 else "")
+        syn = self._get_col("syn", row)
         if syn:
             bracketed_matches = re.findall(r"\((.*?)\)", syn)
             for match in bracketed_matches:
@@ -454,15 +443,14 @@ class DictionaryProcessor:
         # Use first synonym for display in definitions
         thai_display = thai_synonyms[0] if thai_synonyms else thai
 
-        # Additional columns
-        type_word = self.formatter.clean_text(row[6] if len(row) > 6 else "")
-        usage = self.formatter.clean_text(row[7] if len(row) > 7 else "")
-        scient = self.formatter.clean_text(row[8] if len(row) > 8 else "")
-        dom = self.formatter.clean_text(row[9] if len(row) > 9 else "")
-        classif = self.formatter.clean_text(row[10] if len(row) > 10 else "")
-        syn = self.formatter.clean_text(row[11] if len(row) > 11 else "")
-        level = self.formatter.clean_text(row[12] if len(row) > 12 else "")
-        note = self.formatter.clean_text(row[13] if len(row) > 13 else "")
+        # Additional columns (via the mapping; syn already extracted above for paren logic)
+        type_word = self._get_col("type_word", row)
+        usage = self._get_col("usage", row)
+        scient = self._get_col("scient", row)
+        dom = self._get_col("dom", row)
+        classif = self._get_col("classif", row)
+        level = self._get_col("level", row)
+        note = self._get_col("note", row)
 
         # Format pronunciation
         pron_formatted = self.formatter.format_tones(
