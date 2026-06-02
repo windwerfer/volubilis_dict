@@ -41,69 +41,72 @@ this project converts the Volubilis Thai-English dictionary (released as spread 
 
 ## Installation
 
-### Using uv (recommended, modern & fast)
+### Using uv (recommended)
+
+`uv` is the modern, fast way to manage this project. It uses `pyproject.toml` + `uv.lock` for reproducible environments and automatically uses/manages the venv setup.
 
 ```bash
-# 1. Install uv (https://docs.astral.sh/uv/)
+# 1. Install uv (one-time): https://docs.astral.sh/uv/
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 2. Clone and sync the project (this creates a .venv and installs everything)
+# 2. Clone and set up the project
 git clone https://github.com/windwerfer/volubilis_dict.git
 cd volubilis_dict
-uv sync --extra dev
+uv sync
 ```
 
-Then use the project with:
+Run commands with the locked environment:
+
 ```bash
 uv run python main.py data/vol_mundo_01.11.2025.xlsx --debug-1000
-# or activate the venv: source .venv/bin/activate
+# or: uv run volubilis-dict data/vol_mundo_01.11.2025.xlsx --debug-1000
 ```
 
-`uv sync` uses the `uv.lock` file (generated from `pyproject.toml`) for perfectly reproducible environments.
-
-To update dependencies later: edit `pyproject.toml`, then run `uv lock` followed by `uv sync`.
+(After `uv sync` you can also `source .venv/bin/activate` and use plain `python` / `volubilis-dict`.)
 
 ### Classic pip (no uv)
 
+
 ```bash
 git clone https://github.com/windwerfer/volubilis_dict.git
 cd volubilis_dict
-pip install -e ".[dev]"
+pip install -e .
 ```
 
-This installs the package in editable mode plus the (required) build tools and optional dev dependencies declared in `pyproject.toml`.
 
 ## Recommended Installation
 
-because of the danger of supply chain attacks I *hugely* recommend using the provided Docker container.
+Because of the danger of supply chain attacks we *hugely* recommend using the provided devcontainer.
+
 ```bash
 git clone https://github.com/windwerfer/volubilis_dict.git
 ```
-then open the project in VSCode or Zed and it will ask if you want to create the Devcontainer. answer yes, and everything that you run/build inside the container will not be able to see anything else on your computer. (so even if a project gets hijacked, you are not exposed). 
 
-also, it makes it easier to develop, because the dev system is reproducable (looks the same on every computer).
+- Then open the project in VSCode or Zed — it will offer to create the Devcontainer. This gives you a fully reproducible environment that cannot see the rest of your host machine. it should automatically pull all the required packages and uv.
+
+- then open the terminal inside VSCode / Zed and run
+
+```bash
+uv run python main.py data/vol_mundo_01.11.2025.xlsx --debug-1000
+# or: uv run volubilis-dict data/vol_mundo_01.11.2025.xlsx --debug-1000
+```
+
+
 
 ## Managing Dependencies (uv + pyproject.toml)
 
 `pyproject.toml` is the **single source of truth** for what the project needs.
 
-- Core + required build tools (openpyxl, pyglossary, mdict-utils, etc.) live under `[project] dependencies`.
+- Core + required build tools (openpyxl, pyglossary, mdict-utils, python-idzip, etc.) live under `[project] dependencies`.
 - Test / development tools live under `[project.optional-dependencies] dev`.
 
-### How the "locked" reproducible approach works
+### How the locked reproducible approach works
 
-Instead of manually maintaining a broad `requirements.txt` with loose pins:
-
-1. You (or a maintainer) edit `pyproject.toml` when adding/changing a dependency.
-2. Run `uv lock`. This resolves the full dependency tree and writes an exact `uv.lock` file (with specific versions + hashes).
+1. Edit `pyproject.toml` when you want to add or change a dependency.
+2. Run `uv lock` to resolve the full tree and update `uv.lock`.
 3. Commit `uv.lock`.
-4. Everyone else runs `uv sync` (or `uv sync --extra dev` for tests) → they get **bit-identical** packages.
+4. Other people run `uv sync` (or `uv sync --extra dev`) and get bit-identical packages.
 
-This is much more reliable than a hand-written `requirements.txt`.
-
-If you don't have uv, `pip install -e ".[dev]"` still works (it reads pyproject.toml directly and gives you the required build tools + optional dev tools).
-
-To revert to the old broad requirements.txt style, just restore `requirements.txt.bak`.
 
 ## Usage
 
@@ -111,9 +114,11 @@ To revert to the old broad requirements.txt style, just restore `requirements.tx
 
 Create complete Stardict packages from Excel file:
 ```bash
-# Create Stardict and MDict packages
-python main.py data/vol_mundo_01.11.2025.xlsx
+# Preferred (uv users)
+uv run python main.py data/vol_mundo_01.11.2025.xlsx
 
+# Or after `uv sync` + activating the venv, or for classic pip users:
+python main.py data/vol_mundo_01.11.2025.xlsx
 ```
 
 The command will:
@@ -125,7 +130,8 @@ The command will:
 ### Command Line Options
 
 ```bash
-python main.py [OPTIONS] EXCEL_FILE
+uv run python main.py [OPTIONS] EXCEL_FILE
+# or after activating the venv, or with plain pip: python main.py ...
 
 positional arguments:
   excel_file            Path to the Excel file to process
@@ -171,7 +177,7 @@ The following options are **not available as command-line flags**. They are cont
 Example — disable the merged pronunciation dictionary:
 
 ```bash
-VOLUBILIS_TH_PRON_MERGE=false python main.py data/vol_mundo_01.11.2025.xlsx
+VOLUBILIS_TH_PRON_MERGE=false uv run python main.py data/vol_mundo_01.11.2025.xlsx
 ```
 
 ### Caching
@@ -184,7 +190,7 @@ The processor includes intelligent caching to speed up repeated processing:
 
 ```bash
 # Force cache refresh
-python main.py data/vol_mundo_01.11.2025.xlsx --refresh-cache
+uv run python main.py data/vol_mundo_01.11.2025.xlsx --refresh-cache
 ```
 
 ## Dictionary Formats
@@ -234,6 +240,17 @@ The processed dictionary uses standard HTML with CSS classes instead of custom t
 
 
 ## Development
+
+### install additional dev packages (installs pkg pytest)
+
+```bash
+# using uv
+uv sync --extra dev
+
+# old school way
+pip install -e ".[dev]"
+```
+
 
 ### Running Tests
 

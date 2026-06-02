@@ -16,11 +16,12 @@ dependencies = [
     "regex>=2020.0.0",
     "python-dotenv>=1.0.0",
     # Build/conversion tools (required to actually produce the dictionaries)
-    "pyglossary",
-    "mdict-utils",
-    "python-idzip",
-    "beautifulsoup4",
-    "lxml",
+    # Loose lower bounds here; exact versions are locked in uv.lock / requirements.txt
+    "pyglossary>=5.0",
+    "mdict-utils>=1.3",
+    "python-idzip>=0.3",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.0",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

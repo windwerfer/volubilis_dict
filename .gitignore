@@ -11,3 +11,10 @@ mobi
 mdict*/
 stardict*/
 yomitan*/
+
+# Python packaging / build artifacts
+*.egg-info/
+*.egg
+build/
+dist/
+.eggs/
