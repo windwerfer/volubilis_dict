@@ -121,7 +121,7 @@ class DictionaryConfig:
     """Configuration for dictionary processing."""
 
     # File paths
-    excel_file: Path = Path("src/vol_mundo_01.06.2023.xlsx")
+    excel_file: Path = Path("data/vol_mundo_01.11.2025.xlsx")
     output_folder: Path = Path("vol_mundo")
 
     # Processing options

@@ -64,7 +64,7 @@ also, it makes it easier to develop, because the dev system is reproducable (loo
 Create complete Stardict packages from Excel file:
 ```bash
 # Create Stardict and MDict packages
-python main.py src/vol_mundo_01.11.2025.xlsx
+python main.py data/vol_mundo_01.11.2025.xlsx
 
 ```
 
@@ -123,7 +123,7 @@ The following options are **not available as command-line flags**. They are cont
 Example — disable the merged pronunciation dictionary:
 
 ```bash
-VOLUBILIS_TH_PRON_MERGE=false python main.py src/vol_mundo_01.11.2025.xlsx
+VOLUBILIS_TH_PRON_MERGE=false python main.py data/vol_mundo_01.11.2025.xlsx
 ```
 
 ### Caching
@@ -136,7 +136,7 @@ The processor includes intelligent caching to speed up repeated processing:
 
 ```bash
 # Force cache refresh
-python main.py src/vol_mundo_01.11.2025.xlsx --refresh-cache
+python main.py data/vol_mundo_01.11.2025.xlsx --refresh-cache
 ```
 
 ## Dictionary Formats
