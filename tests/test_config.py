@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 
-from volubilis_dict.config import Config, DictionaryConfig, RegexPatterns
+from volubilis_dict.config import COLUMN_DEFS, Config, DictionaryConfig, RegexPatterns
 
 
 class TestRegexPatterns:
@@ -96,14 +96,9 @@ class TestDictionaryConfig:
         """Test that all expected column mapping keys exist."""
         config = DictionaryConfig()
 
-        expected_keys = [
-            'thai_romanized', 'easythai', 'thaiphon', 'thai', 'thai_pron_added',
-            'english', 'french', 'type', 'usage', 'scient', 'dom', 'classif',
-            'syn', 'level', 'note', 'spanish', 'italian', 'portuguese',
-            'german', 'dutch', 'norwegian', 'turkish', 'malay', 'indonesian',
-            'filipino', 'vietnamese', 'russian1', 'russian2', 'lao1', 'lao2',
-            'korean1', 'korean2'
-        ]
+        # Derive from the single source of truth (COLUMN_DEFS) so the test
+        # cannot drift from the actual mapping used for extraction + logging.
+        expected_keys = [key for _, key, _ in COLUMN_DEFS]
 
         for key in expected_keys:
             assert key in config.COLUMN_MAPPING
