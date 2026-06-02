@@ -1,0 +1,234 @@
+"""CLI interface for the Volubilis dictionary processor.
+
+This module contains the main entry point and argument parsing.
+It is intended to be used as:
+    from volubilis_dict.cli import main
+or via the console script.
+"""
+
+import argparse
+import logging
+import sys
+from pathlib import Path
+from typing import Optional
+
+from .config import Config
+from .dictionary_processor import DictionaryProcessor
+from .mdict_builder import MdictBuilder
+from .mobi_builder import MobiBuilder
+from .stardict_builder import StardictBuilder
+from .yomitan_builder import YomitanBuilder
+from .utils_builder import UtilsBuilder
+from . import __version__
+
+
+def setup_logging(verbose: bool = False) -> None:
+    """Setup logging configuration."""
+    level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(
+        level=level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+
+
+def _load_css_for_mdx(mdict_dir: Path) -> Optional[str]:
+    """Load CSS content for embedding in MDX definitions."""
+    css_file = mdict_dir / "txt" / "styles.css"
+    if css_file.exists():
+        return css_file.read_text(encoding="utf-8")
+    return None
+
+
+def create_parser() -> argparse.ArgumentParser:
+    """Create argument parser."""
+    parser = argparse.ArgumentParser(
+        description="Process Volubilis Thai-English dictionary Excel files",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python main.py data/vol_mundo_01.11.2025.xlsx    # Process Excel file
+  python main.py custom.xlsx --output-dir output/
+  python main.py file.xlsx --verbose          # Enable debug logging
+  python main.py file.xlsx --debug-1000       # Process only first 1000 rows for testing
+  python main.py file.xlsx --no-cache         # Disable caching
+  python main.py file.xlsx --refresh-cache    # Force cache refresh
+        """,
+    )
+
+    parser.add_argument(
+        "excel_file", type=Path, help="Path to the Excel file to process"
+    )
+
+    parser.add_argument(
+        "--output-dir",
+        "-o",
+        type=Path,
+        default=Path("stardict/txt"),
+        help="Output directory for processed txt files",
+    )
+
+    parser.add_argument(
+        "--columns", type=int, default=32, help="Number of columns to process"
+    )
+
+    parser.add_argument(
+        "--no-paiboon", action="store_true", help="Disable Paiboon transcription system"
+    )
+
+    parser.add_argument(
+        "--debug-1000",
+        action="store_true",
+        help="Process only first 1000 rows for debugging",
+    )
+
+    parser.add_argument(
+        "-v", "--version", action="version", version=f"%(prog)s {__version__}", help="Show program's version number and exit"
+    )
+
+    parser.add_argument(
+        "--verbose", action="store_true", help="Enable verbose logging"
+    )
+
+    parser.add_argument(
+        "--config", type=Path, help="Path to configuration file (future feature)"
+    )
+
+    parser.add_argument(
+        "--no-cache", action="store_true", help="Disable caching of processed data"
+    )
+
+    parser.add_argument(
+        "--refresh-cache",
+        action="store_true",
+        help="Force refresh of cache even if valid",
+    )
+
+    parser.add_argument(
+        "--inline-css",
+        action="store_true",
+        help="Inline CSS styles in each dictionary entry",
+    )
+
+    parser.add_argument(
+        "--no-dz",
+        action="store_true",
+        help="Disable .dict.dz compression for Stardict format",
+    )
+
+    parser.add_argument(
+        "--create-mobi",
+        action="store_true",
+        help="Create MOBI format files for Kindle",
+    )
+
+    return parser
+
+
+def main() -> int:
+    """Main entry point."""
+    parser = create_parser()
+    args = parser.parse_args()
+
+    # Setup logging
+    setup_logging(args.verbose)
+
+    try:
+        # Load configuration
+        config = Config.from_file()
+
+        # Override config with command line arguments
+        config.dictionary.excel_file = args.excel_file
+        config.dictionary.output_folder = args.output_dir
+        config.dictionary.columns = args.columns
+        config.dictionary.paiboon = not args.no_paiboon
+        config.dictionary.debug_test_1000_rows = args.debug_1000
+        config.dictionary.use_cache = not args.no_cache
+        config.dictionary.force_refresh_cache = args.refresh_cache
+        config.dictionary.inline_css = args.inline_css
+        config.dictionary.no_dz = args.no_dz
+        config.dictionary.create_mobi = args.create_mobi
+
+        # Validate configuration
+        config.validate()
+
+        # Setup shared resources
+        stardict_dir = Path("stardict")
+        mdict_dir = Path("mdict")
+        yomitan_dir = Path("yomitan")
+        yomitan_txt_dir = Path("yomitan/txt")
+        mobi_txt_dir = None
+        if args.create_mobi:
+            mobi_dir = Path("mobi")
+            UtilsBuilder.setup_resources(stardict_dir, mdict_dir, config, mobi_dir, yomitan_dir)
+            mobi_txt_dir = Path("mobi/txt")
+            processor = DictionaryProcessor(config, config.dictionary.css_content, mobi_txt_dir)
+        else:
+            UtilsBuilder.setup_resources(stardict_dir, mdict_dir, config, yomitan_dir=yomitan_dir)
+            processor = DictionaryProcessor(config, config.dictionary.css_content, yomitan_txt_dir)
+        processor.process_excel_file()
+
+        if not args.create_mobi:
+            # Build Stardict packages
+            builder = StardictBuilder(
+                args.output_dir, stardict_dir, css_content=config.dictionary.css_content, config=config.dictionary
+            )
+            logging.info("Converting to Stardict format...")
+            builder.convert_to_stardict()
+
+            logging.info("Creating zip packages...")
+            zip_files = builder.create_zip_packages()
+
+            # Convert to MDX format (CSS handled in definitions)
+            mdx_builder = MdictBuilder(args.output_dir, mdict_dir, None, config=config.dictionary)
+            logging.info("Converting to MDict format...")
+            mdx_builder.convert_to_mdx()
+
+            logging.info("Creating MDict zip package...")
+            mdict_zip_file = mdx_builder.create_zip_package()
+
+            # Convert to Yomichan format
+            yomitan_builder = YomitanBuilder(yomitan_txt_dir, yomitan_dir, css_content=config.dictionary.css_content, config=config.dictionary)
+            logging.info("Converting to Yomichan format...")
+            yomitan_files = yomitan_builder.convert_to_yomitan()
+
+            logging.info("Processing completed successfully")
+            all_zip_files = zip_files + [mdict_zip_file] + yomitan_files
+            logging.info(f"Created {len(all_zip_files)} packages:")
+            for zip_file in all_zip_files:
+                logging.info(f"  - {zip_file}")
+
+        # Convert to MOBI format if requested and calibre is available
+        if args.create_mobi and mobi_txt_dir:
+            import shutil
+
+            if shutil.which("ebook-convert"):
+                logging.info("Converting to MOBI format...")
+                mobi_dir = Path("mobi")
+                mobi_builder = MobiBuilder(mobi_txt_dir, mobi_dir, config.dictionary.css_content, config=config.dictionary)
+                mobi_builder.convert_to_mobi()
+            else:
+                logging.warning("Calibre not found - skipping MOBI conversion")
+
+            logging.info("Processing completed successfully")
+
+        # Final check for MOBI build requirements
+        if config.dictionary.enable_mobi_build:
+            import shutil
+
+            if not shutil.which("ebook-convert"):
+                print(
+                    "\033[91mError: calibre not found. Please install calibre to build MOBI files.\033[0m"
+                )
+
+        return 0
+
+    except Exception as e:
+        logging.error(f"Processing failed: {e}")
+        if args.verbose:
+            import traceback
+
+            traceback.print_exc()
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

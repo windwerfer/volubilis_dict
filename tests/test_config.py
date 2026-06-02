@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 
-from src.config import Config, DictionaryConfig, RegexPatterns
+from volubilis_dict.config import Config, DictionaryConfig, RegexPatterns
 
 
 class TestRegexPatterns:

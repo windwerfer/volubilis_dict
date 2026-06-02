@@ -2,7 +2,7 @@
 
 from unittest.mock import patch
 
-from src.dictionary_processor import DictionaryProcessor
+from volubilis_dict.dictionary_processor import DictionaryProcessor
 
 
 class TestDictionaryProcessor:
@@ -82,7 +82,7 @@ class TestDictionaryProcessor:
         result = processor._format_level_info("", "")
         assert result == ""
 
-    @patch("src.dictionary_processor.OPENPYXL_AVAILABLE", False)
+    @patch("volubilis_dict.dictionary_processor.OPENPYXL_AVAILABLE", False)
     def test_process_excel_mock_data(self, mock_config, temp_dir):
         """Test processing with mock data when openpyxl unavailable."""
         mock_config.dictionary.output_folder = temp_dir / "output"

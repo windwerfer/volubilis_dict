@@ -5,10 +5,10 @@ import tempfile
 from pathlib import Path
 from unittest.mock import Mock
 
-from src.config import Config, DictionaryConfig
-from src.dictionary_processor import DictionaryProcessor
-from src.text_formatter import TextFormatter
-from src.file_handler import FileHandler
+from volubilis_dict.config import Config, DictionaryConfig
+from volubilis_dict.dictionary_processor import DictionaryProcessor
+from volubilis_dict.text_formatter import TextFormatter
+from volubilis_dict.file_handler import FileHandler
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def mock_config(temp_dir):
 @pytest.fixture
 def text_formatter():
     """Create a TextFormatter instance."""
-    from src.config import RegexPatterns
+    from volubilis_dict.config import RegexPatterns
     patterns = RegexPatterns()
     return TextFormatter(patterns)
 
@@ -74,5 +74,5 @@ def mock_openpyxl():
 
     import sys
     from unittest.mock import patch
-    with patch('src.dictionary_processor.load_workbook', mock_load):
+    with patch('volubilis_dict.dictionary_processor.load_workbook', mock_load):
         yield mock_load

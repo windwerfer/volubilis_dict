@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 from pathlib import Path
 
-# Import the actual CLI used for builds (root main.py), not the legacy src/main.py
+# Import via the thin root main.py wrapper (which adds src/ to path and re-exports from volubilis_dict.cli)
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from main import create_parser, main
 
@@ -66,7 +66,7 @@ class TestMainCLI:
 
         assert args.columns == 16
 
-    @patch('main.setup_logging')
+    @patch('volubilis_dict.cli.setup_logging')
     def test_main_missing_excel_file(self, mock_logging):
         """Test main with missing Excel file."""
         with patch('sys.argv', ['main.py', 'nonexistent.xlsx']):
@@ -74,14 +74,14 @@ class TestMainCLI:
 
             assert result == 1
 
-    @patch('main.setup_logging')
+    @patch('volubilis_dict.cli.setup_logging')
     def test_main_invalid_config(self, mock_logging, temp_dir):
         """Test main with invalid configuration."""
         excel_file = temp_dir / "test.xlsx"
         excel_file.touch()
 
         with patch('sys.argv', ['main.py', str(excel_file)]):
-            with patch('main.Config') as mock_config_class:
+            with patch('volubilis_dict.cli.Config') as mock_config_class:
                 mock_config = MagicMock()
                 mock_config.validate.side_effect = ValueError("Invalid config")
                 mock_config_class.return_value = mock_config

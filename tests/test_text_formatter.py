@@ -1,8 +1,8 @@
 """Tests for text formatting utilities."""
 
 import pytest
-from src.config import RegexPatterns
-from src.text_formatter import TextFormatter
+from volubilis_dict.config import RegexPatterns
+from volubilis_dict.text_formatter import TextFormatter
 
 
 class TestTextFormatter:

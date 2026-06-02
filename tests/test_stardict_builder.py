@@ -4,9 +4,9 @@ import pytest
 from unittest.mock import patch, MagicMock
 from pathlib import Path
 
-from src.stardict_builder import StardictBuilder
-from src import __version__
-from src.config import DictionaryConfig
+from volubilis_dict.stardict_builder import StardictBuilder
+from volubilis_dict import __version__
+from volubilis_dict.config import DictionaryConfig
 
 
 class TestStardictBuilder:

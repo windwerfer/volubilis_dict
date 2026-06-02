@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "volubilis-dict"
+dynamic = ["version"]
+description = "Process Volubilis Thai-English dictionary Excel files"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    { name = "Volubilis Dictionary Team" },
+]
+dependencies = [
+    "openpyxl>=3.0.0",
+    "regex>=2020.0.0",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+]
+
+[project.scripts]
+volubilis-dict = "volubilis_dict.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "volubilis_dict.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"volubilis_dict" = ["*.txt"]

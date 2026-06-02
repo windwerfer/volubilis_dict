@@ -1,22 +1,32 @@
-"""Setup script for volubilis-dict."""
+"""Setup script for volubilis-dict (legacy fallback).
+
+Prefer `pyproject.toml` for modern builds and installation.
+This file is kept for compatibility with older tools.
+"""
 
 from setuptools import setup, find_packages
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+# Version is now managed in pyproject.toml via dynamic + src/volubilis_dict/__init__.py
+# but we still support reading it here for pure setup.py usage.
 version = {}
-with open("src/__init__.py", encoding="utf-8") as f:
-    exec(f.read(), version)
+try:
+    with open("src/volubilis_dict/__init__.py", encoding="utf-8") as f:
+        exec(f.read(), version)
+except Exception:
+    version["__version__"] = "1.1"
 
 setup(
     name="volubilis-dict",
-    version=version["__version__"],
+    version=version.get("__version__", "1.1"),
     author="Volubilis Dictionary Team",
     description="Process Volubilis Thai-English dictionary Excel files",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=find_packages(),
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -33,7 +43,7 @@ setup(
         "openpyxl>=3.0.0",
         "regex>=2020.0.0",
     ],
-    # No console script provided; run via `python main.py <excel>` (see README)
-    # The legacy src/main.py was removed as it was out of sync with the build pipeline.
+    # Console script is defined in pyproject.toml
+    # Run with: python main.py (thin dev wrapper) or volubilis-dict after install
     include_package_data=True,
 )

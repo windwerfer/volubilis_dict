@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 
-from src.file_handler import FileHandler
+from volubilis_dict.file_handler import FileHandler
 
 
 class TestFileHandler:
