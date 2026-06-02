@@ -46,18 +46,17 @@ class TestFileHandler:
         assert test_dir.exists()
 
     def test_ensure_directory_with_file_conflict(self, temp_dir):
-        """Test behavior when trying to create directory where file exists."""
+        """Test behavior when trying to create directory where a file blocks the path."""
         test_file = temp_dir / "conflict"
         test_file.write_text("content")
 
         handler = FileHandler()
 
-        # This should work - pathlib handles this case
+        # When a file exists where a directory is needed, mkdir raises
         conflict_dir = temp_dir / "conflict" / "subdir"
-        handler.ensure_directory(conflict_dir)
+        with pytest.raises(NotADirectoryError):
+            handler.ensure_directory(conflict_dir)
 
-        assert conflict_dir.exists()
-        assert conflict_dir.is_dir()
         # Original file should still exist
         assert test_file.exists()
         assert test_file.is_file()

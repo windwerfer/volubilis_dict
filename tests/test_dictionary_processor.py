@@ -122,6 +122,23 @@ class TestDictionaryProcessor:
         for f in files.values():
             f.close()
 
+    def test_open_output_files_without_merge(self, mock_config, temp_dir):
+        """Test output files when th_pron_merge is disabled."""
+        mock_config.dictionary.output_folder = temp_dir / "output"
+        mock_config.dictionary.th_pron_merge = False
+        processor = DictionaryProcessor(mock_config)
+        processor.file_handler.ensure_directory(mock_config.dictionary.output_folder)
+
+        files = processor._open_output_files()
+
+        assert "th_en" in files
+        assert "th_pron_en" in files
+        assert "en_th" in files
+        assert "th_pron_merge_en" not in files
+
+        for f in files.values():
+            f.close()
+
     def test_process_row_valid_data(self, mock_config):
         """Test processing a valid data row."""
         from collections import defaultdict
@@ -206,7 +223,7 @@ class TestDictionaryProcessor:
         assert "Category: animal" in result
 
     def test_add_english_to_thai_entries(self, mock_config):
-        """Test adding English to Thai entries."""
+        """Test adding English to Thai entries (supports | for multiple headwords)."""
         from collections import defaultdict
 
         processor = DictionaryProcessor(mock_config)
@@ -214,8 +231,55 @@ class TestDictionaryProcessor:
         en_th_data = defaultdict(lambda: defaultdict(list))
         definition = '<span class="thai">แมว</span> <span class="pron">[mɛɛw]</span> <span class="type">noun</span> <span class="def">cat</span>'
 
+        # Single
         processor._add_english_to_thai_entries("cat", definition, "noun", en_th_data)
-
         assert "cat" in en_th_data
-        assert "noun" in en_th_data["cat"]
         assert len(en_th_data["cat"]["noun"]) == 1
+
+        # Multiple via | (per project convention for ENG field -> multiple en-th headwords)
+        en_th_data2 = defaultdict(lambda: defaultdict(list))
+        processor._add_english_to_thai_entries("hello|hi", definition, "greeting", en_th_data2)
+        assert "hello" in en_th_data2
+        assert "hi" in en_th_data2
+        assert "greeting" in en_th_data2["hello"]
+        assert len(en_th_data2["hello"]["greeting"]) == 1
+
+    def test_pronunciation_headword_construction(self, mock_config):
+        """Test th_pron and th_pron_merge headword logic with different config flags."""
+        from collections import defaultdict
+
+        # Case 1: include translation in headword, merge enabled (default)
+        mock_config.dictionary.th_pron_incl_translation_in_headword = True
+        mock_config.dictionary.th_pron_merge = True
+        processor = DictionaryProcessor(mock_config)
+
+        row = ("", "", "sà-wàt-dii", "สวัสดี", "hello|hi", "", "", "greeting", "common", "", "", "", "", "A1", "")
+        th_en = defaultdict(list)
+        th_pron = defaultdict(list)
+        th_pron_merge = defaultdict(list)
+        en_th = defaultdict(lambda: defaultdict(list))
+
+        processor._process_row(row, th_en, th_pron, th_pron_merge, en_th)
+
+        # th_pron should have english summary in headword
+        pron_keys = list(th_pron.keys())
+        assert len(pron_keys) == 1
+        assert "sà" in pron_keys[0] and "wàt" in pron_keys[0]  # pron part present (may be normalized)
+        assert "hello" in pron_keys[0] or "hi" in pron_keys[0]  # includes eng
+
+        # merge data collected
+        assert len(th_pron_merge) > 0
+
+        # Case 2: no translation in headword, no merge
+        mock_config.dictionary.th_pron_incl_translation_in_headword = False
+        mock_config.dictionary.th_pron_merge = False
+        processor2 = DictionaryProcessor(mock_config)
+        th_pron2 = defaultdict(list)
+        th_pron_merge2 = defaultdict(list)
+        en_th2 = defaultdict(lambda: defaultdict(list))
+
+        processor2._process_row(row, defaultdict(list), th_pron2, th_pron_merge2, en_th2)
+
+        pron_keys2 = list(th_pron2.keys())
+        assert "hello" not in pron_keys2[0]  # no eng included
+        assert len(th_pron_merge2) == 0  # no merge collection

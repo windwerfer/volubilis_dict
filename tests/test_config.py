@@ -51,10 +51,17 @@ class TestDictionaryConfig:
         assert config.columns == 32
         assert config.paiboon is True
         assert config.debug is False
-        assert config.debug_test_1000_rows is True  # Updated default
+        assert config.debug_test_1000_rows is True
         assert config.th_pron is True
         assert config.th_pron_prefix == '.'
-        assert config.enable_mobi_build is True
+        assert config.th_pron_incl_translation_in_headword is True
+        assert config.th_pron_merge is True
+        assert config.th_pron_merge_prefix == ','
+        assert config.th_pron_merge_incl_translation_in_headword is False
+        assert config.th_pron_max_headword_length == 50
+        assert config.th_pron_merge_max_headword_length == 50
+        assert config.enable_mobi_build is False
+        assert config.create_mobi is False
 
     def test_excel_file_validation(self, temp_dir):
         """Test Excel file validation."""
@@ -140,3 +147,29 @@ class TestConfig:
         assert config.dictionary.columns == 16
         # Other values should remain defaults
         assert config.dictionary.paiboon is True
+
+    def test_pronunciation_env_vars(self, temp_dir, monkeypatch):
+        """Test that pronunciation dictionary options can be set via env vars."""
+        env_file = temp_dir / ".env"
+        env_file.write_text(
+            "VOLUBILIS_TH_PRON=false\n"
+            "VOLUBILIS_TH_PRON_PREFIX=~\n"
+            "VOLUBILIS_TH_PRON_INCL_TRANSLATION=false\n"
+            "VOLUBILIS_TH_PRON_MAX_LENGTH=30\n"
+            "VOLUBILIS_TH_PRON_MERGE=false\n"
+            "VOLUBILIS_TH_PRON_MERGE_PREFIX=;\n"
+            "VOLUBILIS_TH_PRON_MERGE_INCL_TRANSLATION=true\n"
+            "VOLUBILIS_TH_PRON_MERGE_MAX_LENGTH=40\n"
+        )
+
+        monkeypatch.chdir(temp_dir)
+        config = Config.from_file(env_file)
+
+        assert config.dictionary.th_pron is False
+        assert config.dictionary.th_pron_prefix == "~"
+        assert config.dictionary.th_pron_incl_translation_in_headword is False
+        assert config.dictionary.th_pron_max_headword_length == 30
+        assert config.dictionary.th_pron_merge is False
+        assert config.dictionary.th_pron_merge_prefix == ";"
+        assert config.dictionary.th_pron_merge_incl_translation_in_headword is True
+        assert config.dictionary.th_pron_merge_max_headword_length == 40

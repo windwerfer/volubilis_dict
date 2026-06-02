@@ -33,10 +33,7 @@ setup(
         "openpyxl>=3.0.0",
         "regex>=2020.0.0",
     ],
-    entry_points={
-        "console_scripts": [
-            "volubilis-dict=src.main:main",
-        ],
-    },
+    # No console script provided; run via `python main.py <excel>` (see README)
+    # The legacy src/main.py was removed as it was out of sync with the build pipeline.
     include_package_data=True,
 )
