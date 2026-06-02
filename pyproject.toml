@@ -13,7 +13,6 @@ authors = [
 ]
 dependencies = [
     "openpyxl>=3.0.0",
-    "regex>=2020.0.0",
     "python-dotenv>=1.0.0",
     # Build/conversion tools (required to actually produce the dictionaries)
     # Loose lower bounds here; exact versions are locked in uv.lock / requirements.txt
@@ -39,7 +38,7 @@ classifiers = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
-    "pytest-cov",
+    "pytest-cov>=4.0",  # loose lower bound; exact version comes from the lockfile
 ]
 
 
