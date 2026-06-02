@@ -7,16 +7,17 @@ name = "volubilis-dict"
 version = "1.1"
 description = "Process Volubilis Thai-English dictionary Excel files"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 authors = [
     { name = "Volubilis Dictionary Team" },
 ]
+license = { file = "LICENSE" }
 dependencies = [
-    "openpyxl>=3.0.0",
+    "openpyxl>=3.1.0",
     "python-dotenv>=1.0.0",
     # Build/conversion tools (required to actually produce the dictionaries)
     # Loose lower bounds here; exact versions are locked in uv.lock / requirements.txt
-    "pyglossary>=4.5",
+    "pyglossary>=5.0",
     "mdict-utils>=1.3",
     "python-idzip>=0.3",
     "beautifulsoup4>=4.12",
@@ -25,11 +26,9 @@ dependencies = [
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: Public Domain",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -37,7 +36,7 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0",
+    "pytest>=8.0",
     "pytest-cov>=4.0",  # loose lower bound; exact version comes from the lockfile
 ]
 

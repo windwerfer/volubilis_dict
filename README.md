@@ -329,8 +329,12 @@ The codebase has been completely rewritten with modern Python practices:
 
 ---
 
-copyright of the volubilis project:
-All information contained in the files can be used freely. I just invite you to mention the source.
---Francis Bastien
+## License
 
-the copyright of this github project is therefore the same (all files may be used without restrain)
+This project follows the same terms as the original Volubilis dictionary data:
+
+> All information contained in the files can be used freely. I just invite you to mention the source.
+
+— Francis Bastien (Belisan Volubilis)
+
+The code and tooling in this GitHub repository (https://github.com/windwerfer/volubilis_dict) are provided under the same permissive terms. You are free to use, modify, and distribute everything without restriction, with attribution appreciated.
