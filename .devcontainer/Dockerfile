@@ -13,19 +13,3 @@ ENV PATH="/root/.local/bin:/home/vscode/.local/bin:/home/vscode/.opencode/bin:${
 
 # Ensure zsh is the default shell for the vscode user
 RUN sudo chsh -s /usr/bin/zsh vscode
-
-# Add useful aliases
-RUN cat >> /home/$USERNAME/.zshrc << 'EOF'
-
-# === useful aliases ===
-alias ll='ls -alF'
-alias la='ls -A'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias gs='git status'
-alias ga='git add'
-alias gc='git commit -m'
-alias gp='git push'
-alias gl='git log --oneline --graph --decorate'
-
-EOF
