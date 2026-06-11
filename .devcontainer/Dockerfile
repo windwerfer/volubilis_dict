@@ -1,29 +1,31 @@
-FROM python:3.12-trixie
+FROM mcr.microsoft.com/devcontainers/python:3.12-trixie
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    sudo \
-    nano \
-    less \
-    procps \
-    && rm -rf /var/lib/apt/lists/*
+# Best way in Docker: copy the pre-built binary
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
-# ── Create non-root user ──
-ARG USERNAME=dev
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME --shell /bin/bash \
-    && mkdir -p /etc/sudoers.d \
-    && echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME
-
+ARG USERNAME=vscode
 
 USER $USERNAME
 WORKDIR /workspace
 
-ENV PATH="/home/dev/.local/bin:/home/dev/.opencode/bin:${PATH}"
+# additional PATH var - just in case
+ENV PATH="/root/.local/bin:/home/vscode/.local/bin:/home/vscode/.opencode/bin:${PATH}"
 
-SHELL ["/bin/bash", "-c"]
-RUN pip install --no-cache-dir --upgrade pip
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+# Ensure zsh is the default shell for the vscode user
+RUN sudo chsh -s /usr/bin/zsh vscode
+
+# Add useful aliases
+RUN cat >> /home/$USERNAME/.zshrc << 'EOF'
+
+# === useful aliases ===
+alias ll='ls -alF'
+alias la='ls -A'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit -m'
+alias gp='git push'
+alias gl='git log --oneline --graph --decorate'
+
+EOF

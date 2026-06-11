@@ -1,22 +1,23 @@
 {
   "name": "volubilis_dict",
   "build": {
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Dockerfile",
   },
   "postCreateCommand": "uv sync --extra dev && echo '✅ Python environment ready with uv!'",
-  "remoteUser": "dev",
-  "containerUser": "dev",
+  "remoteUser": "vscode",
+  "containerUser": "vscode",
   "updateRemoteUserUID": true,
   "runArgs": ["--userns=keep-id:uid=1000,gid=1000"],
+  // use zsh as the default shell
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "zsh",
+  },
   "containerEnv": {
-    "HOME": "/home/dev"
+    "HOME": "/home/vscode",
   },
   "customizations": {
     "zed": {
-      "extensions": [
-        "mcp-server-sequential-thinking",
-        "mcp-server-context7"
-      ]
-    }
-  }
+      "extensions": ["mcp-server-sequential-thinking", "mcp-server-context7"],
+    },
+  },
 }
